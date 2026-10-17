@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, ShieldCheck, ChevronDown, Building2,
   Clock, MapPin, Share2, Check, AlertCircle, ArrowRight,
-  TrendingUp, Star, Sparkles
+  TrendingUp, Star, Sparkles, User
 } from 'lucide-react';
 
 export interface ShiftItem {
@@ -71,9 +71,10 @@ export default function WorkerDashboardClient({
   const [alert, setAlert]               = useState<{ text: string; type: 'success' | 'warn' | 'error' } | null>(null);
 
   // Urgent shift highlight
-  const urgentShift = shifts.find(s => s.role_needed === 'Nurse' && s.description.toLowerCase().includes('icu')) ||
-                      shifts.find(s => !s.my_application) ||
-                      shifts[0];
+  const urgentShift =
+    shifts.find(s => s.role_needed === 'Nurse' && s.description.toLowerCase().includes('icu')) ||
+    shifts.find(s => !s.my_application) ||
+    shifts[0];
 
   async function handleApply(shiftId: number) {
     setApplying(shiftId);
@@ -111,7 +112,6 @@ export default function WorkerDashboardClient({
         setAlert({ text: data.error || 'Failed to submit application', type: 'error' });
       }
     } catch {
-      // In demo mode without backend
       setAlert({ text: 'Application submitted! (Demo mode)', type: 'success' });
       setShifts(prev =>
         prev.map(s => (s.id === shiftId ? { ...s, my_application: 'pending' } : s))
@@ -121,7 +121,6 @@ export default function WorkerDashboardClient({
     setApplying(null);
   }
 
-  // Filter shifts
   const filteredShifts = shifts.filter(s => {
     const matchRole = selectedRole === 'All' || s.role_needed === selectedRole;
     const matchSearch =
@@ -134,60 +133,53 @@ export default function WorkerDashboardClient({
   });
 
   return (
-    <div className="max-w-[1240px] mx-auto select-none font-sans">
-      {/* ── Top Bar with Live Network Indicator ── */}
-      <div className="flex items-center justify-between pb-4 mb-2">
-        <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-400">
-          <span>tiruf.et</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-slate-600">portal</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-[#2563eb] font-bold">shifts</span>
-        </div>
-
-        <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/80 shadow-xs ml-auto">
+    <div className="max-w-[1240px] mx-auto select-none font-sans pb-10">
+      {/* ── Top Bar: Live Hospital Network + iOS Status Header ── */}
+      <div className="flex items-center justify-between pb-3 md:pb-4 mb-2">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/90 text-emerald-700 text-xs font-bold border border-emerald-200/70 shadow-xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Live Hospital Network
-        </div>
-      </div>
-
-      {/* ── Header: Greeting, Search, Verified Badge ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl md:text-[30px] font-black text-[#12234e] tracking-tight">
-            Hello, {workerName}
-          </h1>
-          <p className="text-sm text-[#64748b] font-medium mt-0.5">
-            {workerCadre} · Addis Ababa Roster
-          </p>
+          <span>Live Hospital Network</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Search bar */}
-          <div className="relative flex items-center">
-            <Search
-              size={17}
-              className="absolute left-3.5 text-slate-400 pointer-events-none"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search shifts, hospitals..."
-              className="w-full sm:w-64 md:w-72 pl-10 pr-4 py-2.5 rounded-full bg-white border border-slate-200 text-xs md:text-sm text-[#12234e] placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
-            />
-          </div>
-
-          {/* Verified Badge */}
-          <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#e8f1ff] text-[#2563eb] text-xs font-bold border border-blue-200 shadow-xs shrink-0">
-            <ShieldCheck size={15} className="text-[#2563eb]" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#e8f1ff] text-[#2563eb] text-xs font-bold border border-blue-200/80 shadow-xs">
+            <ShieldCheck size={14} className="text-[#2563eb]" />
             <span>Verified</span>
           </div>
+
+          <Link
+            href="/worker/profile"
+            className="md:hidden w-8 h-8 rounded-full bg-[#12234e] text-white flex items-center justify-center text-xs font-bold shadow-sm"
+          >
+            {workerName[0] || 'S'}
+          </Link>
         </div>
       </div>
 
-      {/* ── Overview Section Header ── */}
-      <div className="flex items-center justify-between mb-5">
+      {/* ── Greeting & Large Title (iOS HIG Pattern) ── */}
+      <div className="mb-5 md:mb-8">
+        <h1 className="text-[26px] md:text-[32px] font-black text-[#12234e] tracking-tight leading-tight">
+          Hello, {workerName}
+        </h1>
+        <p className="text-xs md:text-sm text-[#64748b] font-medium mt-0.5">
+          {workerCadre} · Addis Ababa Roster
+        </p>
+
+        {/* Full-width iOS-style Search Bar on Mobile */}
+        <div className="relative mt-3.5 md:hidden">
+          <Search size={16} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search shifts, hospitals, wards..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-200/50 focus:bg-white border border-transparent focus:border-[#2563eb] text-sm text-[#12234e] placeholder:text-slate-400 focus:outline-none transition-all"
+          />
+        </div>
+      </div>
+
+      {/* ── Overview Section Header with Timeframe ── */}
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-black text-[#12234e] tracking-tight">
           Overview
         </h2>
@@ -196,7 +188,7 @@ export default function WorkerDashboardClient({
         <div className="relative">
           <button
             onClick={() => setTimeDropdown(!timeDropdown)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#12234e] hover:bg-slate-50 transition-all shadow-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 text-xs font-bold text-[#12234e] hover:bg-slate-50 transition-all shadow-xs cursor-pointer active:scale-95"
           >
             <span>{timeframe}</span>
             <ChevronDown size={14} className="text-slate-400" />
@@ -208,7 +200,7 @@ export default function WorkerDashboardClient({
                 className="fixed inset-0 z-30"
                 onClick={() => setTimeDropdown(false)}
               />
-              <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-100 rounded-xl shadow-xl py-1 z-40 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-100 rounded-2xl shadow-xl py-1 z-40 animate-in fade-in zoom-in-95 duration-100">
                 {['This Week', 'This Month', 'All Time'].map(t => (
                   <button
                     key={t}
@@ -217,7 +209,7 @@ export default function WorkerDashboardClient({
                       setTimeDropdown(false);
                     }}
                     className={`w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-slate-50 transition-colors ${
-                      timeframe === t ? 'text-[#2563eb] bg-blue-50/50' : 'text-slate-700'
+                      timeframe === t ? 'text-[#2563eb] bg-blue-50/50 font-bold' : 'text-slate-700'
                     }`}
                   >
                     {t}
@@ -229,24 +221,24 @@ export default function WorkerDashboardClient({
         </div>
       </div>
 
-      {/* ── 3 Overview Stat Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+      {/* ── 3 Overview Stat Cards (Swipeable Carousel on Mobile, Grid on Desktop) ── */}
+      <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-5 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory no-scrollbar mb-6">
         {/* Card 1: Shift Earnings */}
-        <div className="bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)] flex flex-col justify-between hover:shadow-[0_6px_24px_rgba(18,35,78,0.06)] transition-shadow">
+        <div className="min-w-[260px] md:min-w-0 flex-1 snap-start bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-[#64748b]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs md:text-sm font-semibold text-[#64748b]">
                 Shift Earnings
               </span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#dbeafe] text-[#1d4ed8]">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#dbeafe] text-[#1d4ed8]">
                 +12%
               </span>
             </div>
-            <div className="text-[28px] md:text-[32px] font-black text-[#12234e] tracking-tight mb-4">
+            <div className="text-2xl md:text-[30px] font-black text-[#12234e] tracking-tight mb-3">
               ETB {earnings ? earnings.toLocaleString() : '14,850'}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-100/80">
+          <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100/80">
             <span className="text-[#94a3b8] font-medium">Total Payouts</span>
             <span className="font-bold text-[#2563eb] flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#2563eb]"></span>
@@ -256,21 +248,21 @@ export default function WorkerDashboardClient({
         </div>
 
         {/* Card 2: Open Shifts */}
-        <div className="bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)] flex flex-col justify-between hover:shadow-[0_6px_24px_rgba(18,35,78,0.06)] transition-shadow">
+        <div className="min-w-[260px] md:min-w-0 flex-1 snap-start bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-[#64748b]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs md:text-sm font-semibold text-[#64748b]">
                 Open Shifts
               </span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#e0f7fa] text-[#0284c7]">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#e0f7fa] text-[#0284c7]">
                 +8 New
               </span>
             </div>
-            <div className="text-[28px] md:text-[32px] font-black text-[#12234e] tracking-tight mb-4">
-              {shifts.length > 0 ? (shifts.length * 16 + 28) : '128'}
+            <div className="text-2xl md:text-[30px] font-black text-[#12234e] tracking-tight mb-3">
+              {shifts.length > 0 ? shifts.length * 16 + 28 : '124'}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-100/80">
+          <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100/80">
             <span className="text-[#94a3b8] font-medium">Across 18 Hospitals</span>
             <span className="font-bold text-[#06b6d4] flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#06b6d4]"></span>
@@ -280,22 +272,22 @@ export default function WorkerDashboardClient({
         </div>
 
         {/* Card 3: Hospital Rating */}
-        <div className="bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)] flex flex-col justify-between hover:shadow-[0_6px_24px_rgba(18,35,78,0.06)] transition-shadow">
+        <div className="min-w-[260px] md:min-w-0 flex-1 snap-start bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-[#64748b]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs md:text-sm font-semibold text-[#64748b]">
                 Hospital Rating
               </span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#dbeafe] text-[#1d4ed8] flex items-center gap-1">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#dbeafe] text-[#1d4ed8] flex items-center gap-1">
                 <Star size={11} className="fill-[#1d4ed8] text-[#1d4ed8]" />
                 4.9
               </span>
             </div>
-            <div className="text-[28px] md:text-[32px] font-black text-[#12234e] tracking-tight mb-4">
+            <div className="text-2xl md:text-[30px] font-black text-[#12234e] tracking-tight mb-3">
               98.4%
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-100/80">
+          <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100/80">
             <span className="text-[#94a3b8] font-medium">Fulfillment Score</span>
             <span className="font-black text-[#12234e]">Top 5%</span>
           </div>
@@ -303,89 +295,24 @@ export default function WorkerDashboardClient({
       </div>
 
       {/* ── Middle Split: Demand Analysis + Next Urgent Shift ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-8">
-        {/* Left: Shift Demand Analysis (col-span-7) */}
-        <div className="lg:col-span-7 bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)] flex flex-col justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 mb-6 md:mb-8">
+        {/* Next Urgent Shift Card (Appears first on mobile for immediate clinical action) */}
+        <div className="lg:order-2 lg:col-span-5 bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base font-black text-[#12234e] tracking-tight">
-                Shift Demand Analysis
-              </h3>
-              <button className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer">
-                <span>Weekly</span>
-                <ChevronDown size={12} />
-              </button>
-            </div>
-
-            {/* Custom Bar Chart with Hover Tooltip */}
-            <div className="relative pt-6 pb-2">
-              <div className="h-44 flex items-end justify-between gap-2 sm:gap-3 px-2 sm:px-4">
-                {DEMAND_BARS.map((bar, i) => {
-                  const isHovered = hoveredBar === i;
-                  return (
-                    <div
-                      key={bar.day}
-                      className="flex-1 flex flex-col items-center h-full justify-end relative group cursor-pointer"
-                      onMouseEnter={() => setHoveredBar(i)}
-                      onMouseLeave={() => setHoveredBar(null)}
-                    >
-                      {/* Tooltip */}
-                      {isHovered && (
-                        <div className="absolute -top-10 bg-[#12234e] text-white text-[11px] font-bold px-2 py-1 rounded-md shadow-lg whitespace-nowrap z-30 animate-in fade-in zoom-in-95 duration-100">
-                          {bar.shifts} Shifts {bar.peak ? '(Peak)' : ''}
-                        </div>
-                      )}
-
-                      {/* Bar */}
-                      <div
-                        style={{
-                          height: bar.height,
-                          background:
-                            bar.type === 'navy'
-                              ? '#1c2f72'
-                              : 'linear-gradient(180deg, #3b82f6 0%, #06b6d4 100%)',
-                        }}
-                        className={`w-full max-w-[52px] rounded-t-[8px] transition-all duration-200 ${
-                          isHovered ? 'brightness-110 scale-y-[1.03]' : ''
-                        }`}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Day Labels */}
-              <div className="flex items-center justify-between gap-2 sm:gap-3 px-2 sm:px-4 mt-3 pt-2 border-t border-slate-100">
-                {DEMAND_BARS.map(bar => (
-                  <div
-                    key={bar.day}
-                    className="flex-1 text-center text-xs font-semibold text-[#94a3b8]"
-                  >
-                    {bar.day}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Next Urgent Shift (col-span-5) */}
-        <div className="lg:col-span-5 bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)] flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-bold text-[#12234e]">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs md:text-sm font-bold text-[#12234e]">
                 Next Urgent Shift
               </span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#fee2e2] text-[#ef4444]">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#fee2e2] text-[#ef4444]">
                 Urgent
               </span>
             </div>
 
-            <h3 className="text-xl font-extrabold text-[#12234e] tracking-tight mb-1">
-              {urgentShift?.description?.slice(0, 32) || 'ICU Night Coverage'}
+            <h3 className="text-lg md:text-xl font-black text-[#12234e] tracking-tight mb-1">
+              {urgentShift?.description?.slice(0, 36) || 'ICU Night Coverage'}
             </h3>
 
-            <div className="flex items-center gap-1.5 text-xs md:text-sm text-[#64748b] font-medium mb-6">
+            <div className="flex items-center gap-1.5 text-xs md:text-sm text-[#64748b] font-medium mb-5">
               <Building2 size={15} className="text-[#2563eb]" />
               <span>
                 {urgentShift?.facility_name || 'St. Paul Hospital'} ·{' '}
@@ -393,21 +320,21 @@ export default function WorkerDashboardClient({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-slate-100 mb-6">
+            <div className="grid grid-cols-2 gap-3 py-3 border-t border-b border-slate-100 mb-5">
               <div>
-                <div className="text-xs font-medium text-[#94a3b8] mb-0.5">
+                <div className="text-[11px] font-medium text-[#94a3b8] mb-0.5">
                   Offered Compensation
                 </div>
-                <div className="text-lg font-black text-[#12234e]">
+                <div className="text-base md:text-lg font-black text-[#12234e]">
                   {urgentShift?.pay_etb ? `${urgentShift.pay_etb.toLocaleString()} ETB` : '1,400 ETB'}
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="text-xs font-medium text-[#94a3b8] mb-0.5">
+                <div className="text-[11px] font-medium text-[#94a3b8] mb-0.5">
                   Shift Timing
                 </div>
-                <div className="text-sm font-extrabold text-[#334155]">
+                <div className="text-xs md:text-sm font-extrabold text-[#334155]">
                   {urgentShift ? `${urgentShift.start_time} – ${urgentShift.end_time}` : '19:00 – 07:00'}
                 </div>
               </div>
@@ -416,25 +343,85 @@ export default function WorkerDashboardClient({
 
           <div>
             {urgentShift?.my_application ? (
-              <div className="w-full py-3.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm text-center border border-emerald-200">
+              <div className="w-full py-3 rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-xs md:text-sm text-center border border-emerald-200">
                 ✓ Application {urgentShift.my_application}
               </div>
             ) : (
               <button
                 onClick={() => urgentShift && handleApply(urgentShift.id)}
                 disabled={applying === urgentShift?.id}
-                className="w-full py-3.5 rounded-xl bg-[#1c2f72] hover:bg-[#16255c] active:bg-[#0f1a40] text-white font-bold text-sm transition-all shadow-md shadow-blue-950/10 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-[#1c2f72] hover:bg-[#16255c] active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-950/10 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {applying === urgentShift?.id ? (
                   <span>Submitting Application...</span>
                 ) : (
                   <>
                     <span>Instant Apply</span>
-                    <ArrowRight size={16} />
+                    <ArrowRight size={15} />
                   </>
                 )}
               </button>
             )}
+          </div>
+        </div>
+
+        {/* Shift Demand Analysis (col-span-7) */}
+        <div className="lg:order-1 lg:col-span-7 bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h3 className="text-sm md:text-base font-black text-[#12234e] tracking-tight">
+                Shift Demand Analysis
+              </h3>
+              <span className="text-[11px] font-semibold text-slate-400">Weekly Forecast</span>
+            </div>
+
+            {/* Custom Bar Chart with Touch Tooltips */}
+            <div className="relative pt-4 pb-1">
+              <div className="h-36 md:h-44 flex items-end justify-between gap-1.5 sm:gap-3 px-1 sm:px-4">
+                {DEMAND_BARS.map((bar, i) => {
+                  const isHovered = hoveredBar === i;
+                  return (
+                    <div
+                      key={bar.day}
+                      className="flex-1 flex flex-col items-center h-full justify-end relative group cursor-pointer"
+                      onClick={() => setHoveredBar(hoveredBar === i ? null : i)}
+                      onMouseEnter={() => setHoveredBar(i)}
+                      onMouseLeave={() => setHoveredBar(null)}
+                    >
+                      {isHovered && (
+                        <div className="absolute -top-9 bg-[#12234e] text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-lg whitespace-nowrap z-30 animate-in fade-in duration-100">
+                          {bar.shifts} Shifts {bar.peak ? '🔥' : ''}
+                        </div>
+                      )}
+
+                      <div
+                        style={{
+                          height: bar.height,
+                          background:
+                            bar.type === 'navy'
+                              ? '#1c2f72'
+                              : 'linear-gradient(180deg, #3b82f6 0%, #06b6d4 100%)',
+                        }}
+                        className={`w-full max-w-[44px] rounded-t-[6px] md:rounded-t-[8px] transition-all duration-150 ${
+                          isHovered ? 'brightness-110 scale-y-[1.03]' : ''
+                        }`}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between gap-1.5 sm:gap-3 px-1 sm:px-4 mt-2.5 pt-2 border-t border-slate-100">
+                {DEMAND_BARS.map(bar => (
+                  <div
+                    key={bar.day}
+                    className="flex-1 text-center text-[10px] md:text-xs font-semibold text-[#94a3b8]"
+                  >
+                    {bar.day}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -442,7 +429,7 @@ export default function WorkerDashboardClient({
       {/* ── Status Alert Notice ── */}
       {alert && (
         <div
-          className={`mb-6 p-4 rounded-xl text-sm font-medium border flex items-center justify-between ${
+          className={`mb-6 p-4 rounded-2xl text-xs md:text-sm font-medium border flex items-center justify-between animate-in fade-in duration-150 ${
             alert.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : alert.type === 'warn'
@@ -450,51 +437,51 @@ export default function WorkerDashboardClient({
               : 'bg-rose-50 border-rose-200 text-rose-800'
           }`}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {alert.type === 'success' ? (
-              <Check size={18} className="text-emerald-600" />
+              <Check size={16} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle size={18} />
+              <AlertCircle size={16} className="shrink-0" />
             )}
             <span>{alert.text}</span>
           </div>
           <button
             onClick={() => setAlert(null)}
-            className="text-xs font-bold underline opacity-80 hover:opacity-100"
+            className="text-xs font-bold underline opacity-80 hover:opacity-100 ml-2"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* ── EXISTING FEATURE 1: Available Shifts & Role Filter ── */}
-      <div className="bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)] mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+      {/* ── Available Shifts Feed & Role Filter ── */}
+      <div className="bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] mb-6 md:mb-8">
+        <div className="flex items-center justify-between gap-3 mb-4">
           <div>
-            <h3 className="text-lg font-black text-[#12234e] tracking-tight">
+            <h3 className="text-base md:text-lg font-black text-[#12234e] tracking-tight">
               Available Shifts in Addis Ababa
             </h3>
             <p className="text-xs text-[#64748b] mt-0.5">
-              Select your role, inspect hospital details, and apply with conflict validation.
+              Verified pay & direct hospital contact
             </p>
           </div>
 
           <Link
             href="/worker/shifts"
-            className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-0.5 shrink-0"
           >
-            View all {shifts.length} shifts
+            See all
             <ArrowRight size={13} />
           </Link>
         </div>
 
-        {/* Role Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-5">
+        {/* Role Segmented Filter (Scrollable on phone) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar mb-4">
           {ROLES.map(role => (
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer active:scale-95 ${
                 selectedRole === role
                   ? 'bg-[#1c2f72] text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'
@@ -505,13 +492,13 @@ export default function WorkerDashboardClient({
           ))}
         </div>
 
-        {/* Shift Cards Feed */}
+        {/* Shift Cards */}
         {filteredShifts.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-sm">
-            No open shifts match your search criteria.
+          <div className="text-center py-10 text-slate-400 text-xs">
+            No open shifts match your filter.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {filteredShifts.slice(0, 6).map(shift => {
               const isApplied = !!shift.my_application;
               const dateStr = new Date(shift.shift_date).toLocaleDateString('en-GB', {
@@ -523,21 +510,22 @@ export default function WorkerDashboardClient({
               return (
                 <div
                   key={shift.id}
-                  className="p-5 rounded-2xl border border-slate-100 bg-[#fbfcfd] hover:bg-white hover:border-blue-200 transition-all flex flex-col justify-between"
+                  className="p-4 md:p-5 rounded-2xl md:rounded-[18px] border border-slate-100 bg-[#fbfcfd] hover:bg-white hover:border-blue-200 transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#2563eb]">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-[#2563eb]">
                           {shift.role_needed}
                         </span>
                         <Link
                           href={`/worker/shifts/${shift.id}`}
-                          className="block text-sm font-bold text-[#12234e] hover:text-[#2563eb] transition-colors mt-1.5"
+                          className="block text-sm font-bold text-[#12234e] hover:text-[#2563eb] transition-colors mt-1"
                         >
                           {shift.description}
                         </Link>
                       </div>
+
                       <div className="text-right shrink-0">
                         <div className="text-base font-black text-[#1c2f72]">
                           ETB {shift.pay_etb.toLocaleString()}
@@ -546,51 +534,53 @@ export default function WorkerDashboardClient({
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mb-4">
-                      <span className="flex items-center gap-1">
-                        <Building2 size={13} className="text-slate-400" />
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3">
+                      <span className="flex items-center gap-1 font-medium text-slate-700">
+                        <Building2 size={13} className="text-[#2563eb]" />
                         {shift.facility_name}
                       </span>
+                      <span>·</span>
                       <span className="flex items-center gap-1">
-                        <MapPin size={13} className="text-slate-400" />
-                        {shift.location}
+                        <MapPin size={12} className="text-slate-400" />
+                        {shift.location.split(',')[0]}
                       </span>
+                      <span>·</span>
                       <span className="flex items-center gap-1">
-                        <Clock size={13} className="text-slate-400" />
-                        {shift.start_time} – {shift.end_time}
+                        <Clock size={12} className="text-slate-400" />
+                        {shift.start_time}–{shift.end_time}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                    <span className="text-xs font-semibold text-slate-600">
+                  <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
+                    <span className="font-semibold text-slate-600">
                       📅 {dateStr}
                     </span>
 
                     <div className="flex items-center gap-2">
                       <a
                         href={`https://wa.me/?text=${encodeURIComponent(
-                          `🚨 ${shift.role_needed} Shift in Addis Ababa!\n🏥 ${shift.facility_name}\n📍 ${shift.location}\n📅 ${dateStr} (${shift.start_time} - ${shift.end_time})\n💰 ETB ${shift.pay_etb.toLocaleString()}\nApply on Tiruf!`
+                          `🚨 ${shift.role_needed} Shift in Addis Ababa!\n🏥 ${shift.facility_name}\n📍 ${shift.location}\n📅 ${dateStr}\n💰 ETB ${shift.pay_etb.toLocaleString()}\nApply on Tiruf!`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Share on WhatsApp"
-                        className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                        className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors active:scale-95"
                       >
-                        <Share2 size={14} />
+                        <Share2 size={13} />
                       </a>
 
                       {isApplied ? (
-                        <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
                           {shift.my_application === 'confirmed' ? '✓ Confirmed' : '⏳ Pending'}
                         </span>
                       ) : (
                         <button
                           onClick={() => handleApply(shift.id)}
                           disabled={applying === shift.id}
-                          className="px-4 py-1.5 rounded-lg bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                          className="px-3.5 py-1.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer active:scale-95 shadow-xs"
                         >
-                          {applying === shift.id ? 'Applying...' : 'Apply Now'}
+                          {applying === shift.id ? 'Applying...' : 'Apply'}
                         </button>
                       )}
                     </div>
@@ -602,44 +592,44 @@ export default function WorkerDashboardClient({
         )}
       </div>
 
-      {/* ── EXISTING FEATURE 2: My Applications & Booked Roster ── */}
-      <div className="bg-white rounded-[20px] border border-[#eef2f8] p-6 shadow-[0_4px_20px_rgba(18,35,78,0.03)]">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-black text-[#12234e] tracking-tight">
-            My Applications & Confirmed Shifts
+      {/* ── My Applications List ── */}
+      <div className="bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)]">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base md:text-lg font-black text-[#12234e] tracking-tight">
+            My Applications & Bookings
           </h3>
           <Link
             href="/worker/my-shifts"
-            className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-0.5"
           >
-            Manage applications
+            Manage
             <ArrowRight size={13} />
           </Link>
         </div>
 
         {applications.length === 0 ? (
-          <p className="text-xs text-slate-400 py-6 text-center">
-            No active shift applications yet. Apply to open shifts above!
+          <p className="text-xs text-slate-400 py-4 text-center">
+            No shift applications yet. Tap &apos;Apply&apos; on any open shift above.
           </p>
         ) : (
           <div className="divide-y divide-slate-100">
             {applications.map(app => (
               <div
                 key={app.id}
-                className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                className="py-3 flex items-center justify-between gap-2"
               >
                 <div>
-                  <div className="text-sm font-bold text-[#12234e]">
+                  <div className="text-xs md:text-sm font-bold text-[#12234e]">
                     {app.role_needed} — {app.facility_name}
                   </div>
-                  <div className="text-xs text-slate-400 mt-0.5">
-                    Shift Date: {new Date(app.shift_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <div className="text-[11px] text-slate-400 mt-0.5">
+                    {new Date(app.shift_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
                       app.status === 'confirmed'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : app.status === 'rejected'
@@ -649,7 +639,7 @@ export default function WorkerDashboardClient({
                   >
                     {app.status.toUpperCase()}
                   </span>
-                  <span className="text-sm font-black text-[#12234e]">
+                  <span className="text-xs md:text-sm font-black text-[#12234e]">
                     ETB {app.pay_etb?.toLocaleString()}
                   </span>
                 </div>

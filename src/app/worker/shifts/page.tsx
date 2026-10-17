@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, Building2, MapPin, Clock, Calendar,
   Share2, ArrowRight, CheckCircle2, ShieldCheck,
-  AlertCircle, Check, Briefcase, Filter
+  AlertCircle, Check, Briefcase, Filter, X
 } from 'lucide-react';
 
 interface Shift {
@@ -170,7 +170,7 @@ export default function WorkerShiftsPage() {
       const res = await fetch(`/api/shifts/${shiftId}/apply`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ text: 'Application submitted! The hospital will review it.', type: 'success' });
+        setMessage({ text: 'Application submitted! Hospital notified.', type: 'success' });
         setShifts(prev =>
           prev.map(s => (s.id === shiftId ? { ...s, my_application: 'pending' } : s))
         );
@@ -180,7 +180,7 @@ export default function WorkerShiftsPage() {
         setMessage({ text: data.error || 'Failed to apply', type: 'error' });
       }
     } catch {
-      setMessage({ text: 'Application submitted (Demo mode)!', type: 'success' });
+      setMessage({ text: 'Application submitted! (Demo mode)', type: 'success' });
       setShifts(prev =>
         prev.map(s => (s.id === shiftId ? { ...s, my_application: 'pending' } : s))
       );
@@ -203,72 +203,64 @@ export default function WorkerShiftsPage() {
   const confirmed = shifts.filter(s => s.my_application === 'confirmed').length;
 
   return (
-    <div className="max-w-[1240px] mx-auto select-none font-sans">
-      {/* ── Top Bar with Live Network Indicator ── */}
-      <div className="flex items-center justify-between pb-4 mb-2">
-        <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-400">
-          <span>tiruf.et</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-slate-600">portal</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-[#2563eb] font-bold">shifts</span>
-        </div>
-
-        <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/80 shadow-xs ml-auto">
+    <div className="max-w-[1240px] mx-auto select-none font-sans pb-10">
+      {/* ── Top Bar: Live Hospital Network ── */}
+      <div className="flex items-center justify-between pb-3 md:pb-4 mb-2">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/90 text-emerald-700 text-xs font-bold border border-emerald-200/70 shadow-xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Live Hospital Network
-        </div>
-      </div>
-
-      {/* ── Header: Title, Search, Stats ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl md:text-[30px] font-black text-[#12234e] tracking-tight">
-            Browse Hospital Shifts
-          </h1>
-          <p className="text-sm text-[#64748b] font-medium mt-0.5">
-            Licensed shifts across Addis Ababa hospitals — verified pay & instant booking
-            {isDemo && <span className="ml-2 text-xs text-slate-400 font-semibold">(demo roster)</span>}
-          </p>
+          <span>Live Hospital Network</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Search bar */}
-          <div className="relative flex items-center">
-            <Search size={17} className="absolute left-3.5 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search role, hospital, subcity..."
-              className="w-full sm:w-64 md:w-72 pl-10 pr-4 py-2.5 rounded-full bg-white border border-slate-200 text-xs md:text-sm text-[#12234e] placeholder:text-slate-400 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
-            />
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-1 rounded-full bg-blue-50 text-[#2563eb] text-xs font-bold border border-blue-200/80 shadow-xs">
+            {applied} Applied
           </div>
-
-          {/* Quick Counter Pills */}
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-              <span className="text-xs font-black text-[#2563eb] mr-1">{applied}</span>
-              <span className="text-[11px] font-medium text-slate-500">Applied</span>
-            </div>
-            <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-              <span className="text-xs font-black text-emerald-600 mr-1">{confirmed}</span>
-              <span className="text-[11px] font-medium text-slate-500">Confirmed</span>
-            </div>
+          <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/80 shadow-xs">
+            {confirmed} Confirmed
           </div>
         </div>
       </div>
 
-      {/* ── Role Filter Pills ── */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6">
+      {/* ── Large Title (iOS HIG Pattern) & Search ── */}
+      <div className="mb-5 md:mb-6">
+        <h1 className="text-[26px] md:text-[32px] font-black text-[#12234e] tracking-tight leading-tight">
+          Browse Hospital Shifts
+        </h1>
+        <p className="text-xs md:text-sm text-[#64748b] font-medium mt-0.5">
+          Verified Addis Ababa shifts · Instant booking & peer ratings
+        </p>
+
+        {/* Full-width iOS-style Search Bar */}
+        <div className="relative mt-3.5">
+          <Search size={16} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search role, hospital, subcity..."
+            className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-slate-200/50 focus:bg-white border border-transparent focus:border-[#2563eb] text-sm text-[#12234e] placeholder:text-slate-400 focus:outline-none transition-all shadow-xs"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3.5 top-2.5 p-1 text-slate-400 hover:text-slate-600 rounded-full"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── Role Filter (iOS Segmented Scrollable Control) ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar mb-5">
         {FILTERS.map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer active:scale-95 ${
               filter === f
                 ? 'bg-[#1c2f72] text-white shadow-xs'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                : 'bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-50'
             }`}
           >
             {f}
@@ -276,10 +268,10 @@ export default function WorkerShiftsPage() {
         ))}
       </div>
 
-      {/* ── Alert Notice ── */}
+      {/* ── Notification Banner ── */}
       {message && (
         <div
-          className={`mb-6 p-4 rounded-xl text-sm font-medium border flex items-center justify-between animate-in fade-in duration-150 ${
+          className={`mb-5 p-4 rounded-2xl text-xs md:text-sm font-medium border flex items-center justify-between animate-in fade-in duration-150 ${
             message.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : message.type === 'warn'
@@ -287,30 +279,30 @@ export default function WorkerShiftsPage() {
               : 'bg-rose-50 border-rose-200 text-rose-800'
           }`}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {message.type === 'success' ? (
-              <Check size={18} className="text-emerald-600" />
+              <Check size={16} className="text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle size={18} />
+              <AlertCircle size={16} className="shrink-0" />
             )}
             <span>{message.text}</span>
           </div>
           <button
             onClick={() => setMessage(null)}
-            className="text-xs font-bold underline opacity-80 hover:opacity-100"
+            className="text-xs font-bold underline opacity-80 hover:opacity-100 ml-2"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* ── Shifts Grid ── */}
+      {/* ── Shifts List Grid ── */}
       {loading ? (
         <div className="text-center py-24 text-slate-400 text-sm">
           Loading shifts across Addis Ababa...
         </div>
       ) : visible.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-xs">
+        <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-xs">
           <div className="text-3xl mb-2">🔍</div>
           <div className="font-bold text-[#12234e] text-base">No shifts found</div>
           <div className="text-xs text-slate-400 mt-1">
@@ -318,7 +310,7 @@ export default function WorkerShiftsPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-4">
           {visible.map(shift => {
             const isApplied = !!shift.my_application;
             const dateStr = new Date(shift.shift_date).toLocaleDateString('en-GB', {
@@ -333,49 +325,51 @@ export default function WorkerShiftsPage() {
             return (
               <div
                 key={shift.id}
-                className="bg-white rounded-2xl border border-[#eef2f8] p-5 shadow-[0_4px_20px_rgba(18,35,78,0.03)] hover:shadow-[0_6px_24px_rgba(18,35,78,0.06)] hover:border-blue-200 transition-all flex flex-col justify-between"
+                className="bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-4 md:p-5 shadow-[0_3px_16px_rgba(18,35,78,0.03)] hover:border-blue-200 transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-3 mb-2.5">
+                  <div className="flex items-start justify-between gap-2.5 mb-2.5">
                     <div>
-                      <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#2563eb]">
+                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-50 text-[#2563eb]">
                         {shift.role_needed}
                       </span>
                       <Link
                         href={`/worker/shifts/${shift.id}`}
-                        className="block text-base font-extrabold text-[#12234e] hover:text-[#2563eb] transition-colors mt-1.5"
+                        className="block text-sm md:text-base font-extrabold text-[#12234e] hover:text-[#2563eb] transition-colors mt-1.5"
                       >
                         {shift.description}
                       </Link>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <div className="text-lg font-black text-[#1c2f72]">
+                      <div className="text-base md:text-lg font-black text-[#1c2f72]">
                         ETB {shift.pay_etb.toLocaleString()}
                       </div>
                       <div className="text-[10px] text-slate-400 font-medium">per shift</div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mb-4">
-                    <span className="flex items-center gap-1 font-medium text-slate-700">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3.5">
+                    <span className="flex items-center gap-1 font-semibold text-slate-700">
                       <Building2 size={13} className="text-[#2563eb]" />
                       {shift.facility_name}
                     </span>
+                    <span>·</span>
                     <span className="flex items-center gap-1">
-                      <MapPin size={13} className="text-slate-400" />
-                      {shift.location}
+                      <MapPin size={12} className="text-slate-400" />
+                      {shift.location.split(',')[0]}
                     </span>
+                    <span>·</span>
                     <span className="flex items-center gap-1">
-                      <Clock size={13} className="text-slate-400" />
-                      {shift.start_time} – {shift.end_time}
+                      <Clock size={12} className="text-slate-400" />
+                      {shift.start_time}–{shift.end_time}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-600">
+                    <span className="font-semibold text-slate-600">
                       📅 {dateStr}
                     </span>
                     {daysUntil <= 2 && (
@@ -393,14 +387,14 @@ export default function WorkerShiftsPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Share to WhatsApp"
-                      className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                      className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors active:scale-95"
                     >
-                      <Share2 size={14} />
+                      <Share2 size={13} />
                     </a>
 
                     {isApplied ? (
                       <span
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${
+                        className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border ${
                           shift.my_application === 'confirmed'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : 'bg-amber-50 text-amber-700 border-amber-200'
@@ -412,7 +406,7 @@ export default function WorkerShiftsPage() {
                       <button
                         onClick={() => applyForShift(shift.id)}
                         disabled={applying === shift.id}
-                        className="px-4 py-2 rounded-xl bg-[#1c2f72] hover:bg-[#16255c] active:bg-[#0f1a40] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                        className="px-4 py-2 rounded-2xl bg-[#1c2f72] hover:bg-[#16255c] active:scale-[0.98] text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-xs"
                       >
                         {applying === shift.id ? 'Applying...' : 'Apply Now'}
                       </button>
