@@ -45,6 +45,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Tiruf" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <I18nProvider>{children}</I18nProvider>
         <PWARegister />
