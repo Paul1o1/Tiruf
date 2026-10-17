@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Tailwind token colours */
+  --color-bg: #F7F9FB;
+  --color-surface: #FFFFFF;
+  --color-primary: #1c2f72;
+  --color-primary-tint: #eef2ff;
+  --color-ink: #0B1B2B;
+  --color-muted: #64748B;
+  --color-border: #E5EAF0;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #E11D48;
+  --color-info: #2563EB;
+  --color-urgent: #FB7185;
+
+  /* Legacy shorthand vars used throughout the app */
+  --bg:          #F7F9FB;
+  --bg-elevated: #FFFFFF;
+  --white:       #FFFFFF;
+  --border:      #E5EAF0;
+
+  --blue:        #4e7fe8;
+  --blue-dark:   #1c2f72;
+  --blue-light:  #eef2ff;
+
+  --teal:        #35bdd0;
+  --teal-dark:   #0f766e;
+  --teal-light:  #f0fdfa;
+
+  --text-primary:   #0f172a;
+  --text-secondary: #64748b;
+  --text-muted:     #94a3b8;
+
+  --danger:      #dc2626;
+  --danger-light:#fef2f2;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-primary: var(--color-primary);
+  --color-primary-tint: var(--color-primary-tint);
+  --color-ink: var(--color-ink);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+  --color-urgent: var(--color-urgent);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shadow-soft {
+  box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+}
+
+.shadow-bento {
+  box-shadow: 
+    0 1px 2px rgba(28, 47, 114, 0.04),
+    0 12px 32px -4px rgba(28, 47, 114, 0.08),
+    0 0 0 1px rgba(28, 47, 114, 0.06);
+}
+
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam 12s linear infinite;
+}
+
