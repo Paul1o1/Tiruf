@@ -143,70 +143,49 @@ export default function WorkerCalendarClient({
   }
 
   return (
-    <div className="max-w-[1240px] mx-auto select-none font-sans pb-12">
-      {/* ── Top Bar: Subdued Status ── */}
-      <div className="flex items-center justify-between pb-3 md:pb-4 mb-3 border-b border-slate-200/60">
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-          <span>Roster Schedule</span>
-          <span className="text-slate-300">·</span>
-          <span>Addis Ababa Hospitals</span>
+    <div style={{ maxWidth: 1200, margin: '0 auto', fontFamily: "'Inter', -apple-system, sans-serif", paddingBottom: 48 }}>
+      {/* ── Top Bar ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 14, marginBottom: 14, borderBottom: '1px solid #f3f4f6' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#6b7280', fontWeight: 500 }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+          Roster Schedule · Addis Ababa Hospitals
         </div>
-
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             onClick={jumpToToday}
-            className="px-3 py-1 rounded-md bg-white border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+            style={{ padding: '4px 12px', borderRadius: 6, background: '#ffffff', border: '1px solid #e5e7eb', color: '#374151', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
           >
             Today
           </button>
-          <div className="px-3 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200/60">
+          <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 9999, background: '#eef2ff', color: '#1c2f72', border: '1px solid #c7d2fe' }}>
             {totalUpcomingCount} Confirmed
-          </div>
+          </span>
         </div>
       </div>
 
       {/* ── Title ── */}
-      <div className="mb-5 md:mb-6">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-          Shift Calendar & Roster
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 600, color: '#111111', letterSpacing: '-0.5px', marginBottom: 4 }}>
+          Shift Calendar &amp; Roster
         </h1>
-        <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">
+        <p style={{ fontSize: 14, color: '#6b7280' }}>
           Select any date to view scheduled department shifts, reporting times, and hospital locations.
         </p>
       </div>
 
       {/* ── Metric Cards ── */}
-      <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x no-scrollbar mb-6">
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
-          <div className="text-xs font-semibold text-slate-500 mb-1">Upcoming Assignments</div>
-          <div className="text-2xl md:text-3xl font-extrabold text-slate-900">
-            {totalUpcomingCount}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24, overflowX: 'auto' }}>
+        {[
+          { label: 'Upcoming Assignments',    value: totalUpcomingCount,            sub: `ETB ${totalUpcomingPay.toLocaleString()} scheduled` },
+          { label: 'Completed History',        value: totalCompletedCount,           sub: `ETB ${totalEarned.toLocaleString()} disbursed`  },
+          { label: 'Scheduled Clinical Hours', value: `${totalUpcomingCount * 12} hrs`, sub: '100% Verified attendance' },
+        ].map(card => (
+          <div key={card.label} style={{ background: '#f5f5f5', borderRadius: 12, border: '1px solid #e5e7eb', padding: '18px 20px' }}>
+            <div style={{ fontSize: 12, color: '#6b7280', fontWeight: 500, marginBottom: 8 }}>{card.label}</div>
+            <div style={{ fontSize: 26, fontWeight: 600, color: '#111111', letterSpacing: '-0.5px' }}>{card.value}</div>
+            <div style={{ fontSize: 12, color: '#898989', marginTop: 6 }}>{card.sub}</div>
           </div>
-          <div className="text-xs font-medium text-slate-500 mt-2">
-            ETB {totalUpcomingPay.toLocaleString()} scheduled
-          </div>
-        </div>
-
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
-          <div className="text-xs font-semibold text-slate-500 mb-1">Completed History</div>
-          <div className="text-2xl md:text-3xl font-extrabold text-slate-900">
-            {totalCompletedCount}
-          </div>
-          <div className="text-xs font-medium text-slate-500 mt-2">
-            ETB {totalEarned.toLocaleString()} disbursed
-          </div>
-        </div>
-
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
-          <div className="text-xs font-semibold text-slate-500 mb-1">Scheduled Clinical Hours</div>
-          <div className="text-2xl md:text-3xl font-extrabold text-slate-900">
-            {totalUpcomingCount * 12} hrs
-          </div>
-          <div className="text-xs font-medium text-slate-500 mt-2">
-            100% Verified attendance record
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* ── Main Interactive Split: Calendar & Agenda ── */}
