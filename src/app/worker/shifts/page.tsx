@@ -303,7 +303,9 @@ export default function WorkerShiftsPage() {
         </div>
       ) : visible.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-xs">
-          <div className="text-3xl mb-2">🔍</div>
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <Search size={22} className="text-slate-400" />
+          </div>
           <div className="font-bold text-[#12234e] text-base">No shifts found</div>
           <div className="text-xs text-slate-400 mt-1">
             Try adjusting your search query or selecting a different specialty.
@@ -369,8 +371,8 @@ export default function WorkerShiftsPage() {
 
                 <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-600">
-                      📅 {dateStr}
+                    <span className="flex items-center gap-1.5 font-semibold text-slate-600">
+                      <Calendar size={12} className="text-slate-400" />{dateStr}
                     </span>
                     {daysUntil <= 2 && (
                       <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
@@ -394,13 +396,13 @@ export default function WorkerShiftsPage() {
 
                     {isApplied ? (
                       <span
-                        className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border ${
+                        className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border flex items-center gap-1 ${
                           shift.my_application === 'confirmed'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : 'bg-amber-50 text-amber-700 border-amber-200'
                         }`}
                       >
-                        {shift.my_application === 'confirmed' ? '✓ Confirmed' : '⏳ Pending'}
+                        {shift.my_application === 'confirmed' ? <><CheckCircle2 size={12} /> Confirmed</> : <><AlertCircle size={12} /> Pending</>}
                       </span>
                     ) : (
                       <button

@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import {
+  CalendarDays, Clock, CheckCircle2, Hourglass,
+  FlagTriangleRight, XCircle, MapPin, Phone, ArrowRight,
+} from 'lucide-react';
 
 interface Application {
   app_id: number;
@@ -20,11 +24,11 @@ interface Application {
 
 type Tab = 'upcoming' | 'pending' | 'past' | 'declined';
 
-const TAB_LABELS: { key: Tab; label: string; icon: string }[] = [
-  { key: 'upcoming', label: 'Upcoming',  icon: '✅' },
-  { key: 'pending',  label: 'Pending',   icon: '⏳' },
-  { key: 'past',     label: 'Past',      icon: '🏁' },
-  { key: 'declined', label: 'Declined',  icon: '✗'  },
+const TAB_META: { key: Tab; label: string; Icon: React.ElementType }[] = [
+  { key: 'upcoming', label: 'Upcoming',  Icon: CheckCircle2 },
+  { key: 'pending',  label: 'Pending',   Icon: Hourglass    },
+  { key: 'past',     label: 'Past',      Icon: FlagTriangleRight },
+  { key: 'declined', label: 'Declined',  Icon: XCircle      },
 ];
 
 const STATUS_CHIP: Record<string, { color: string; bg: string; border: string; label: string }> = {
@@ -42,10 +46,10 @@ const DEMO: Application[] = [
 ];
 
 export default function MyShiftsPage() {
-  const [apps, setApps]   = useState<Application[]>([]);
-  const [isDemo, setIsDemo] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab]     = useState<Tab>('upcoming');
+  const [apps, setApps]         = useState<Application[]>([]);
+  const [isDemo, setIsDemo]     = useState(false);
+  const [loading, setLoading]   = useState(true);
+  const [tab, setTab]           = useState<Tab>('upcoming');
   const [withdrawing, setWithdrawing] = useState<number | null>(null);
 
   function loadApplications() {
@@ -64,18 +68,14 @@ export default function MyShiftsPage() {
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => {
-    loadApplications();
-  }, []);
+  useEffect(() => { loadApplications(); }, []);
 
   async function handleWithdraw(shiftId: number) {
     if (!confirm('Are you sure you want to withdraw this application?')) return;
     setWithdrawing(shiftId);
     try {
       const res = await fetch(`/api/shifts/${shiftId}/apply`, { method: 'DELETE' });
-      if (res.ok) {
-        setApps(prev => prev.filter(a => a.shift_id !== shiftId));
-      }
+      if (res.ok) setApps(prev => prev.filter(a => a.shift_id !== shiftId));
     } catch (e) {
       console.error(e);
     } finally {
@@ -98,66 +98,80 @@ export default function MyShiftsPage() {
     return new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
+  const EMPTY_ICONS: Record<Tab, React.ElementType> = {
+    upcoming: CalendarDays,
+    pending:  Hourglass,
+    past:     FlagTriangleRight,
+    declined: XCircle,
+  };
+
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', fontFamily: "'Inter', -apple-system, sans-serif" }}>
 
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.4px' }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a2332', letterSpacing: '-0.4px' }}>
           My Applications
           {isDemo && <span style={{ marginLeft: 10, fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>(demo)</span>}
         </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
+        <p style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>
           Track your shift applications and upcoming bookings
         </p>
       </div>
 
-      {/* Summary chips */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
-        {TAB_LABELS.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '8px 16px', borderRadius: 50, border: '1.5px solid',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
-              borderColor: tab === t.key ? 'var(--blue)' : 'var(--border)',
-              background:  tab === t.key ? 'var(--blue)' : 'var(--white)',
-              color:       tab === t.key ? 'white'       : 'var(--text-secondary)',
-            }}
-          >
-            {t.icon} {t.label}
-            <span style={{
-              minWidth: 20, height: 20, borderRadius: 10,
-              background: tab === t.key ? 'rgba(255,255,255,0.25)' : 'var(--bg)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: tab === t.key ? 'white' : 'var(--text-muted)',
-            }}>
-              {grouped[t.key].length}
-            </span>
-          </button>
-        ))}
+      {/* Tab bar */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+        {TAB_META.map(({ key, label, Icon }) => {
+          const active = tab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 16px', borderRadius: 50, border: '1.5px solid',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                borderColor: active ? '#1c2f72' : '#e2e8f0',
+                background:  active ? '#1c2f72' : 'white',
+                color:       active ? 'white'   : '#475569',
+              }}
+            >
+              <Icon size={14} />
+              {label}
+              <span style={{
+                minWidth: 20, height: 20, borderRadius: 10,
+                background: active ? 'rgba(255,255,255,0.20)' : '#f1f5f9',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 700, color: active ? 'white' : '#64748b',
+              }}>
+                {grouped[key].length}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* List */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>Loading…</div>
-      ) : visible.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--white)', borderRadius: 16, border: '1.5px solid var(--border)' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>
-            {tab === 'upcoming' ? '📅' : tab === 'pending' ? '⏳' : tab === 'past' ? '🏁' : '✗'}
+        <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>Loading…</div>
+      ) : visible.length === 0 ? (() => {
+        const EmptyIcon = EMPTY_ICONS[tab];
+        return (
+          <div style={{ textAlign: 'center', padding: '56px 24px', background: 'white', borderRadius: 16, border: '1.5px solid #f0f2f7' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <EmptyIcon size={24} color="#94a3b8" />
+            </div>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#1a2332', marginBottom: 6 }}>
+              No {tab} applications
+            </p>
+            {tab === 'upcoming' && (
+              <Link href="/worker/shifts" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12, padding: '10px 22px', borderRadius: 50, background: '#1c2f72', color: 'white', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+                Browse Shifts <ArrowRight size={14} />
+              </Link>
+            )}
           </div>
-          <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
-            No {tab} applications
-          </p>
-          {tab === 'upcoming' && (
-            <Link href="/worker/shifts" style={{ display: 'inline-block', marginTop: 12, padding: '10px 24px', borderRadius: 50, background: 'var(--blue)', color: 'white', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
-              Browse Shifts →
-            </Link>
-          )}
-        </div>
-      ) : (
+        );
+      })() : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {visible.map(a => {
             const chip = STATUS_CHIP[a.app_status] ?? STATUS_CHIP.pending;
@@ -166,25 +180,27 @@ export default function MyShiftsPage() {
               <div
                 key={a.app_id}
                 style={{
-                  background: 'var(--white)',
+                  background: 'white',
                   borderRadius: 16,
-                  border: `1.5px solid ${isUpcoming ? 'var(--teal)' : 'var(--border)'}`,
-                  borderLeft: `4px solid var(--blue)`,
+                  border: '1.5px solid #f0f2f7',
+                  borderLeft: `4px solid #1c2f72`,
                   padding: '18px 20px',
+                  boxShadow: '0 2px 12px rgba(18,35,78,0.04)',
                 }}
               >
-                {/* Top */}
+                {/* Top row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: '#1a2332', marginBottom: 3 }}>
                       {a.role_needed} — {a.facility_name}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                      📍 {a.location}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: '#64748b' }}>
+                      <MapPin size={12} color="#94a3b8" />
+                      {a.location}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--blue)' }}>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1c2f72' }}>
                       ETB {a.pay_etb.toLocaleString()}
                     </div>
                     <span style={{ display: 'inline-block', marginTop: 4, fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 20, color: chip.color, background: chip.bg, border: `1px solid ${chip.border}` }}>
@@ -193,39 +209,44 @@ export default function MyShiftsPage() {
                   </div>
                 </div>
 
-                {/* Meta */}
-                <div style={{ display: 'flex', gap: 14, fontSize: 13, color: 'var(--text-secondary)', marginBottom: isUpcoming && a.contact_phone ? 14 : 0 }}>
-                  <span>📅 {fmtDate(a.shift_date)}</span>
-                  <span>⏰ {a.start_time}–{a.end_time}</span>
+                {/* Meta row */}
+                <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#64748b', marginBottom: isUpcoming && a.contact_phone ? 14 : 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <CalendarDays size={13} color="#94a3b8" />
+                    {fmtDate(a.shift_date)}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <Clock size={13} color="#94a3b8" />
+                    {a.start_time}–{a.end_time}
+                  </span>
                 </div>
 
-                {/* Contact — only shown when confirmed */}
+                {/* Contact — only when confirmed */}
                 {isUpcoming && a.contact_phone && (
                   <div style={{
-                    marginTop: 12,
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    background: 'var(--teal-light)',
-                    border: '1px solid #99f6e4',
+                    marginTop: 12, padding: '10px 14px', borderRadius: 10,
+                    background: '#f0fdfa', border: '1px solid #99f6e4',
                     display: 'flex', alignItems: 'center', gap: 10,
                   }}>
-                    <span style={{ fontSize: 18 }}>📞</span>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#ccfbf1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Phone size={15} color="#0f766e" />
+                    </div>
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--teal-dark)' }}>Facility Contact</div>
-                      <a href={`tel:${a.contact_phone}`} style={{ fontSize: 14, fontWeight: 700, color: 'var(--teal-dark)', textDecoration: 'none' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#0f766e', marginBottom: 1 }}>Facility Contact</div>
+                      <a href={`tel:${a.contact_phone}`} style={{ fontSize: 14, fontWeight: 700, color: '#0f766e', textDecoration: 'none' }}>
                         {a.contact_phone}
                       </a>
                     </div>
                   </div>
                 )}
 
-                {/* Actions row */}
+                {/* Actions */}
                 <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <Link
                     href={`/worker/shifts/${a.shift_id}`}
-                    style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)', textDecoration: 'none' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#1c2f72', textDecoration: 'none' }}
                   >
-                    View Shift Details →
+                    View Shift Details <ArrowRight size={13} />
                   </Link>
 
                   {a.app_status === 'pending' && (
@@ -233,15 +254,9 @@ export default function MyShiftsPage() {
                       onClick={() => handleWithdraw(a.shift_id)}
                       disabled={withdrawing === a.shift_id}
                       style={{
-                        padding: '4px 12px',
-                        borderRadius: 8,
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: '#dc2626',
-                        background: '#fef2f2',
-                        border: '1px solid #fecaca',
-                        cursor: 'pointer',
-                        opacity: withdrawing === a.shift_id ? 0.6 : 1,
+                        padding: '4px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                        color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca',
+                        cursor: 'pointer', opacity: withdrawing === a.shift_id ? 0.6 : 1,
                       }}
                     >
                       {withdrawing === a.shift_id ? 'Withdrawing…' : 'Withdraw'}
@@ -254,10 +269,10 @@ export default function MyShiftsPage() {
         </div>
       )}
 
-      {/* Browse CTA */}
+      {/* Footer CTA */}
       <div style={{ marginTop: 28, textAlign: 'center' }}>
-        <Link href="/worker/shifts" style={{ fontSize: 14, fontWeight: 600, color: 'var(--blue)', textDecoration: 'none' }}>
-          Browse available shifts →
+        <Link href="/worker/shifts" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#1c2f72', textDecoration: 'none' }}>
+          Browse available shifts <ArrowRight size={14} />
         </Link>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { getServerUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { StarRating } from '@/components/ui';
 import Link from 'next/link';
+import { Star, Check, Circle } from 'lucide-react';
 
 const DEMO_RATINGS = [
   { stars:5, comment:'Abebe was punctual, professional, and handled ICU patients with exceptional care.', created_at:'2026-04-28T10:00:00Z', facility_name:'Black Lion Hospital' },
@@ -123,7 +124,10 @@ export default async function WorkerProfilePage() {
           ].map(item => (
             <span key={item.label} style={{ fontSize:12, fontWeight:600, display:'flex', alignItems:'center', gap:4,
               color: item.done ? '#1D9E75' : '#94a3b8' }}>
-              {item.done ? '✓' : '○'} {item.label}
+              {item.done
+                ? <Check size={12} style={{ flexShrink: 0 }} />
+                : <Circle size={12} style={{ flexShrink: 0 }} />}
+              {item.label}
             </span>
           ))}
         </div>
@@ -159,11 +163,13 @@ export default async function WorkerProfilePage() {
         </div>
       ) : (
         <div style={{ background:'white', borderRadius:16, border:'1.5px solid #f0f2f7', padding:'32px 24px', textAlign:'center' }}>
-          <div style={{ fontSize:32, marginBottom:10 }}>⭐</div>
+          <div style={{ width:52, height:52, borderRadius:14, background:'#fffbeb', display:'inline-flex', alignItems:'center', justifyContent:'center', marginBottom:14 }}>
+            <Star size={24} color="#d97706" />
+          </div>
           <p style={{ fontSize:15, fontWeight:600, color:'#1a2332', marginBottom:4 }}>No reviews yet</p>
           <p style={{ fontSize:14, color:'#64748b' }}>Complete your first shift to receive ratings from facilities.</p>
-          <Link href="/worker/shifts" style={{ display:'inline-block', marginTop:14, padding:'10px 24px', borderRadius:50, background:'linear-gradient(135deg,#1c2f72,#4e7fe8)', color:'white', fontSize:14, fontWeight:700, textDecoration:'none' }}>
-            Browse Shifts →
+          <Link href="/worker/shifts" style={{ display:'inline-block', marginTop:14, padding:'10px 24px', borderRadius:50, background:'#1c2f72', color:'white', fontSize:14, fontWeight:700, textDecoration:'none' }}>
+            Browse Shifts
           </Link>
         </div>
       )}

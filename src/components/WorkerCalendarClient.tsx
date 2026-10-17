@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   ChevronLeft, ChevronRight, Calendar as CalendarIcon,
   Clock, MapPin, Building2, CheckCircle2, ArrowRight,
-  Download, Share2, Sparkles, Filter
+  Download, Share2, Filter
 } from 'lucide-react';
 
 export interface CalendarShift {
@@ -76,7 +76,6 @@ export default function WorkerCalendarClient({
 
   // Generate calendar days
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-  // Adjust so Monday is 0 (Sunday is 6)
   const mondayOffset = (firstDayOfMonth + 6) % 7;
   const daysInMonth  = new Date(currentYear, currentMonth + 1, 0).getDate();
 
@@ -89,7 +88,7 @@ export default function WorkerCalendarClient({
     calendarDays.push({ dateStr, dayNum: d, isCurrentMonth: true });
   }
 
-  // Group shifts by date for quick lookup
+  // Group shifts by date
   const shiftsByDate: Record<string, CalendarShift[]> = {};
   allShifts.forEach(s => {
     const d = s.shift_date.slice(0, 10);
@@ -97,10 +96,8 @@ export default function WorkerCalendarClient({
     shiftsByDate[d].push(s);
   });
 
-  // Shifts for selected date
   const selectedDayShifts = shiftsByDate[selectedDate] || [];
 
-  // Filtered shifts for the list view
   const displayShifts = allShifts
     .filter(s => {
       if (filterTab === 'upcoming') return s.status === 'confirmed' || s.status === 'pending';
@@ -109,13 +106,11 @@ export default function WorkerCalendarClient({
     })
     .sort((a, b) => new Date(a.shift_date).getTime() - new Date(b.shift_date).getTime());
 
-  // Metrics
   const totalUpcomingCount = initialUpcoming.length;
   const totalCompletedCount = initialCompleted.length;
   const totalEarned = initialCompleted.reduce((acc, s) => acc + Number(s.pay_etb), 0);
   const totalUpcomingPay = initialUpcoming.reduce((acc, s) => acc + Number(s.pay_etb), 0);
 
-  // ICS export
   function downloadICS(shift: CalendarShift) {
     const d = new Date(shift.shift_date);
     const datePart = d.toISOString().slice(0, 10).replace(/-/g, '');
@@ -129,7 +124,7 @@ export default function WorkerCalendarClient({
       'BEGIN:VEVENT',
       `SUMMARY:Tiruf Shift: ${shift.role_needed} at ${shift.facility_name}`,
       `LOCATION:${shift.facility_name}, ${shift.location}`,
-      `DESCRIPTION:Clinical shift via Tiruf. Pay: ETB ${shift.pay_etb}`,
+      `DESCRIPTION:Clinical shift via Tiruf. Compensation: ETB ${shift.pay_etb}`,
       `DTSTART:${datePart}T${startClean}`,
       `DTEND:${datePart}T${endClean}`,
       'STATUS:CONFIRMED',
@@ -149,65 +144,67 @@ export default function WorkerCalendarClient({
 
   return (
     <div className="max-w-[1240px] mx-auto select-none font-sans pb-12">
-      {/* ── Top Bar: Live Hospital Network ── */}
-      <div className="flex items-center justify-between pb-3 md:pb-4 mb-2">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/90 text-emerald-700 text-xs font-bold border border-emerald-200/70 shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Live Hospital Roster</span>
+      {/* ── Top Bar: Subdued Status ── */}
+      <div className="flex items-center justify-between pb-3 md:pb-4 mb-3 border-b border-slate-200/60">
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <span>Roster Schedule</span>
+          <span className="text-slate-300">·</span>
+          <span>Addis Ababa Hospitals</span>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={jumpToToday}
-            className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+            className="px-3 py-1 rounded-md bg-white border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
           >
             Today
           </button>
-          <div className="px-3 py-1 rounded-full bg-blue-50 text-[#2563eb] text-xs font-bold border border-blue-200/80 shadow-xs">
+          <div className="px-3 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200/60">
             {totalUpcomingCount} Confirmed
           </div>
         </div>
       </div>
 
-      {/* ── Title & Large Header ── */}
+      {/* ── Title ── */}
       <div className="mb-5 md:mb-6">
-        <h1 className="text-[26px] md:text-[32px] font-black text-[#12234e] tracking-tight leading-tight">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
           Shift Calendar & Roster
         </h1>
-        <p className="text-xs md:text-sm text-[#64748b] font-medium mt-0.5">
-          Tap any date to inspect scheduled clinical shifts, timings, and hospital directions.
+        <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">
+          Select any date to view scheduled department shifts, reporting times, and hospital locations.
         </p>
       </div>
 
-      {/* ── Quick Stat Metric Cards (Carousel on mobile) ── */}
-      <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-5 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x no-scrollbar mb-6">
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
-          <div className="text-xs font-bold text-slate-500 mb-1">Upcoming Shifts</div>
-          <div className="text-2xl md:text-3xl font-black text-[#1c2f72]">
+      {/* ── Metric Cards ── */}
+      <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x no-scrollbar mb-6">
+        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
+          <div className="text-xs font-semibold text-slate-500 mb-1">Upcoming Assignments</div>
+          <div className="text-2xl md:text-3xl font-extrabold text-slate-900">
             {totalUpcomingCount}
           </div>
-          <div className="text-xs font-semibold text-[#2563eb] mt-2">
-            ETB {totalUpcomingPay.toLocaleString()} confirmed
+          <div className="text-xs font-medium text-slate-500 mt-2">
+            ETB {totalUpcomingPay.toLocaleString()} scheduled
           </div>
         </div>
 
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
-          <div className="text-xs font-bold text-slate-500 mb-1">Completed History</div>
-          <div className="text-2xl md:text-3xl font-black text-[#1c2f72]">
+        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
+          <div className="text-xs font-semibold text-slate-500 mb-1">Completed History</div>
+          <div className="text-2xl md:text-3xl font-extrabold text-slate-900">
             {totalCompletedCount}
           </div>
-          <div className="text-xs font-semibold text-emerald-600 mt-2">
-            ETB {totalEarned.toLocaleString()} earned
+          <div className="text-xs font-medium text-slate-500 mt-2">
+            ETB {totalEarned.toLocaleString()} disbursed
           </div>
         </div>
 
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
-          <div className="text-xs font-bold text-slate-500 mb-1">Roster Commitment</div>
-          <div className="text-2xl md:text-3xl font-black text-[#1c2f72]">
+        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
+          <div className="text-xs font-semibold text-slate-500 mb-1">Scheduled Clinical Hours</div>
+          <div className="text-2xl md:text-3xl font-extrabold text-slate-900">
             {totalUpcomingCount * 12} hrs
           </div>
-          <div className="text-xs font-semibold text-slate-400 mt-2">
-            100% on-time attendance
+          <div className="text-xs font-medium text-slate-500 mt-2">
+            100% Verified attendance record
           </div>
         </div>
       </div>
@@ -215,27 +212,25 @@ export default function WorkerCalendarClient({
       {/* ── Main Interactive Split: Calendar & Agenda ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-8">
         {/* Left: Interactive Calendar Widget (lg:col-span-7) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/70 p-5 md:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            {/* Month Header with interactive navigation */}
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <span className="text-lg md:text-xl font-black text-[#12234e]">
-                  {MONTH_NAMES[currentMonth]} {currentYear}
-                </span>
-              </div>
+            {/* Month Header */}
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <span className="text-base md:text-lg font-bold text-slate-900">
+                {MONTH_NAMES[currentMonth]} {currentYear}
+              </span>
 
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={prevMonth}
-                  className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
                   aria-label="Previous Month"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={nextMonth}
-                  className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
                   aria-label="Next Month"
                 >
                   <ChevronRight size={16} />
@@ -246,7 +241,7 @@ export default function WorkerCalendarClient({
             {/* Day Header Row */}
             <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2 text-center">
               {DAY_NAMES.map(d => (
-                <div key={d} className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-1">
+                <div key={d} className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-1">
                   {d}
                 </div>
               ))}
@@ -269,31 +264,31 @@ export default function WorkerCalendarClient({
                   <button
                     key={cell.dateStr}
                     onClick={() => setSelectedDate(cell.dateStr)}
-                    className={`h-11 md:h-12 rounded-2xl flex flex-col items-center justify-center relative transition-all cursor-pointer active:scale-95 ${
+                    className={`h-10 md:h-11 rounded-xl flex flex-col items-center justify-center relative transition-all cursor-pointer active:scale-95 ${
                       isSelected
-                        ? 'bg-[#1c2f72] text-white shadow-md shadow-blue-950/20 font-black'
+                        ? 'bg-[#1c2f72] text-white shadow-xs font-bold'
                         : isToday
-                        ? 'bg-blue-50 text-[#2563eb] font-bold border border-blue-200'
+                        ? 'bg-slate-100 text-slate-900 font-bold border border-slate-300'
                         : hasUpcoming
-                        ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200'
+                        ? 'bg-slate-50 text-slate-900 font-bold border border-slate-200'
                         : 'text-slate-700 hover:bg-slate-50 font-medium'
                     }`}
                   >
                     <span className="text-xs md:text-sm">{cell.dayNum}</span>
 
-                    {/* Indicator dots */}
+                    {/* Subdued Indicators */}
                     <div className="flex items-center gap-0.5 mt-0.5">
                       {hasUpcoming && (
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
-                            isSelected ? 'bg-cyan-300' : 'bg-emerald-500'
+                            isSelected ? 'bg-white' : 'bg-emerald-600'
                           }`}
                         />
                       )}
                       {hasCompleted && (
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
-                            isSelected ? 'bg-white/80' : 'bg-slate-400'
+                            isSelected ? 'bg-white/70' : 'bg-slate-400'
                           }`}
                         />
                       )}
@@ -305,31 +300,31 @@ export default function WorkerCalendarClient({
           </div>
 
           {/* Calendar Legend */}
-          <div className="flex flex-wrap items-center gap-4 pt-4 mt-5 border-t border-slate-100 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-4 pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
               <span>Confirmed Shift</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1c2f72]"></span>
+              <span className="w-2 h-2 rounded-full bg-[#1c2f72]"></span>
               <span>Selected Date</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span className="w-2 h-2 rounded-full bg-slate-300"></span>
               <span>Today</span>
             </div>
           </div>
         </div>
 
         {/* Right: Selected Date Agenda (lg:col-span-5) */}
-        <div className="lg:col-span-5 bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)] flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/70 p-5 md:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Agenda for
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Agenda
                 </span>
-                <h3 className="text-lg font-black text-[#12234e]">
+                <h3 className="text-base font-bold text-slate-900">
                   {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-GB', {
                     weekday: 'short',
                     day: 'numeric',
@@ -340,27 +335,27 @@ export default function WorkerCalendarClient({
               </div>
 
               {selectedDayShifts.length > 0 && (
-                <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200/60">
                   {selectedDayShifts.length} {selectedDayShifts.length === 1 ? 'Shift' : 'Shifts'}
                 </span>
               )}
             </div>
 
             {selectedDayShifts.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center mx-auto mb-3">
-                  <CalendarIcon size={22} />
+              <div className="py-10 text-center">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
+                  <CalendarIcon size={20} />
                 </div>
-                <div className="font-bold text-[#12234e] text-sm">No Shifts Scheduled</div>
-                <p className="text-xs text-slate-400 mt-1 max-w-[200px] mx-auto">
-                  You have no clinical shifts booked for this day.
+                <div className="font-semibold text-slate-800 text-xs">No Shifts Scheduled</div>
+                <p className="text-[11px] text-slate-400 mt-0.5 max-w-[200px] mx-auto">
+                  No clinical shifts booked for this selected date.
                 </p>
                 <Link
                   href="/worker/shifts"
-                  className="inline-flex items-center gap-1 mt-4 px-4 py-2 rounded-xl bg-[#2563eb] text-white text-xs font-bold hover:bg-[#1d4ed8] active:scale-95 transition-all shadow-xs"
+                  className="inline-flex items-center gap-1 mt-3 px-3.5 py-1.5 rounded-lg bg-[#1c2f72] text-white text-xs font-semibold hover:bg-[#152355] transition-all shadow-xs"
                 >
                   Browse Available Shifts
-                  <ArrowRight size={13} />
+                  <ArrowRight size={12} />
                 </Link>
               </div>
             ) : (
@@ -370,26 +365,20 @@ export default function WorkerCalendarClient({
                   return (
                     <div
                       key={s.id}
-                      className="p-4 rounded-2xl border border-slate-100 bg-[#fbfcfd] hover:border-blue-200 transition-all"
+                      className="p-3.5 rounded-xl border border-slate-200/60 bg-[#fbfcfd] hover:border-slate-300 transition-all"
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div>
-                          <span
-                            className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                              isConfirmed
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
-                          >
-                            {isConfirmed ? '✓ Confirmed Shift' : 'Completed'}
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/60">
+                            {isConfirmed ? 'Confirmed Shift' : 'Completed'}
                           </span>
-                          <div className="font-extrabold text-[#12234e] text-sm mt-1">
+                          <div className="font-bold text-slate-900 text-sm mt-1">
                             {s.role_needed}
                           </div>
                         </div>
 
                         <div className="text-right">
-                          <div className="text-base font-black text-[#1c2f72]">
+                          <div className="text-base font-extrabold text-[#1c2f72]">
                             ETB {s.pay_etb.toLocaleString()}
                           </div>
                           <div className="text-[10px] text-slate-400">compensation</div>
@@ -397,33 +386,33 @@ export default function WorkerCalendarClient({
                       </div>
 
                       <div className="space-y-1.5 text-xs text-slate-600 my-3">
-                        <div className="flex items-center gap-1.5 font-semibold text-slate-800">
-                          <Building2 size={13} className="text-[#2563eb]" />
+                        <div className="flex items-center gap-1.5 font-medium text-slate-800">
+                          <Building2 size={12} className="text-[#1c2f72]" />
                           <span>{s.facility_name}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-slate-500">
-                          <MapPin size={13} className="text-slate-400" />
+                          <MapPin size={12} className="text-slate-400" />
                           <span>{s.location}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-slate-500">
-                          <Clock size={13} className="text-slate-400" />
+                          <Clock size={12} className="text-slate-400" />
                           <span>{s.start_time} – {s.end_time}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                      <div className="flex items-center gap-2 pt-2.5 border-t border-slate-100">
                         <button
                           onClick={() => downloadICS(s)}
-                          title="Export to Apple / Google Calendar"
-                          className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-95"
+                          title="Save to Phone Calendar"
+                          className="flex-1 py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
-                          <Download size={13} />
-                          <span>Save to Phone</span>
+                          <Download size={12} />
+                          <span>Save to Calendar</span>
                         </button>
 
                         <Link
                           href={`/worker/shifts/${s.id}`}
-                          className="py-2 px-4 rounded-xl bg-[#1c2f72] hover:bg-[#16255c] text-white text-xs font-bold transition-all active:scale-95 text-center shadow-xs"
+                          className="py-1.5 px-3 rounded-lg bg-[#1c2f72] hover:bg-[#152355] text-white text-xs font-semibold transition-all text-center shadow-xs"
                         >
                           View Details
                         </Link>
@@ -438,26 +427,26 @@ export default function WorkerCalendarClient({
       </div>
 
       {/* ── All Confirmed Shifts List ── */}
-      <div className="bg-white rounded-3xl md:rounded-[22px] border border-[#eef2f8] p-5 md:p-6 shadow-[0_3px_16px_rgba(18,35,78,0.03)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div className="bg-white rounded-2xl border border-slate-200/70 p-5 md:p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
           <div>
-            <h3 className="text-base md:text-lg font-black text-[#12234e] tracking-tight">
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">
               Shift Roster Overview
             </h3>
-            <p className="text-xs text-[#64748b] mt-0.5">
-              Review all confirmed assignments and completed shift history.
+            <p className="text-xs text-slate-500 mt-0.5">
+              All confirmed clinical appointments and historical records
             </p>
           </div>
 
           {/* Filter Segmented Control */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl self-start sm:self-auto">
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg self-start sm:self-auto border border-slate-200/60">
             {(['upcoming', 'completed', 'all'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setFilterTab(tab)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all capitalize cursor-pointer active:scale-95 ${
+                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all capitalize cursor-pointer ${
                   filterTab === tab
-                    ? 'bg-white text-[#12234e] shadow-xs'
+                    ? 'bg-white text-slate-900 shadow-xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -468,7 +457,7 @@ export default function WorkerCalendarClient({
         </div>
 
         {displayShifts.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-xs">
+          <div className="text-center py-10 text-slate-400 text-xs">
             No shifts found for this category.
           </div>
         ) : (
@@ -481,44 +470,47 @@ export default function WorkerCalendarClient({
               return (
                 <div
                   key={s.id}
-                  className="p-4 rounded-2xl border border-slate-100 bg-[#fbfcfd] hover:bg-white hover:border-blue-200 transition-all flex flex-col justify-between"
+                  className="p-4 rounded-xl border border-slate-200/60 bg-[#fbfcfd] hover:bg-white hover:border-slate-300 transition-all flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                            isConfirmed
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}
-                        >
-                          {isConfirmed ? (days <= 0 ? 'Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`) : 'Completed'}
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/60">
+                          {isConfirmed ? (days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`) : 'Completed'}
                         </span>
-                        <div className="font-extrabold text-[#12234e] text-sm mt-1">
+                        <div className="font-bold text-slate-900 text-sm mt-1">
                           {s.role_needed} — {s.facility_name}
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <div className="text-sm font-black text-[#1c2f72]">
+                        <div className="text-base font-extrabold text-[#1c2f72]">
                           ETB {s.pay_etb.toLocaleString()}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3">
-                      <span>📍 {s.location.split(',')[0]}</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin size={11} className="text-slate-400" />
+                        {s.location.split(',')[0]}
+                      </span>
                       <span>·</span>
-                      <span>⏰ {s.start_time}–{s.end_time}</span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={11} className="text-slate-400" />
+                        {s.start_time}–{s.end_time}
+                      </span>
                       <span>·</span>
-                      <span>🗓 {d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                      <span className="flex items-center gap-1">
+                        <CalendarIcon size={11} className="text-slate-400" />
+                        {d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
                     <span className="text-[11px] font-semibold text-slate-400">
-                      ID: #{s.id}
+                      Shift #{s.id}
                     </span>
 
                     <div className="flex items-center gap-2">
@@ -527,12 +519,12 @@ export default function WorkerCalendarClient({
                         title="Save to Phone Calendar"
                         className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                       >
-                        <Download size={13} />
+                        <Download size={12} />
                       </button>
 
                       <Link
                         href={`/worker/shifts/${s.id}`}
-                        className="px-3 py-1 rounded-xl bg-[#2563eb] text-white text-xs font-bold hover:bg-[#1d4ed8] active:scale-95 transition-all shadow-xs"
+                        className="px-3 py-1 rounded-lg bg-[#1c2f72] text-white text-xs font-semibold hover:bg-[#152355] transition-all shadow-xs"
                       >
                         Details
                       </Link>
