@@ -14,7 +14,7 @@ export default async function WorkerLayout({ children }: { children: React.React
   } catch { /* db not connected yet */ }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f5f7fc]">
+    <div className="flex h-screen overflow-hidden bg-white">
       <Navbar userType="worker" userName={name} />
       <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 md:p-8 pb-24 md:pb-12">
         {children}

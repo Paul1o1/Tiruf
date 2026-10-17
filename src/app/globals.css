@@ -1,100 +1,237 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   TIRUF DESIGN SYSTEM  ·  Cal.com-inspired with brand blue (#1c2f72)
+   Adaptation notes:
+     - Cal's primary (#111111) → Tiruf brand (#1c2f72)
+     - Same white canvas, light-gray cards, and dark footer rhythm
+     - Inter at 600 weight + negative letter-spacing substitutes Cal Sans
+───────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  /* Tailwind token colours */
-  --color-bg: #F7F9FB;
-  --color-surface: #FFFFFF;
-  --color-primary: #1c2f72;
-  --color-primary-tint: #eef2ff;
-  --color-ink: #0B1B2B;
-  --color-muted: #64748B;
-  --color-border: #E5EAF0;
-  --color-success: #16A34A;
-  --color-warning: #F59E0B;
-  --color-danger: #E11D48;
-  --color-info: #2563EB;
-  --color-urgent: #FB7185;
+  /* ── Core Palette ── */
+  --canvas:           #ffffff;    /* page floor (cal: canvas) */
+  --surface-soft:     #f8f9fa;    /* very soft section divider */
+  --surface-card:     #f5f5f5;    /* feature cards, testimonials */
+  --surface-strong:   #e5e7eb;    /* hairline alt / disabled bg */
+  --surface-dark:     #101010;    /* footer & featured dark card */
+  --surface-dark-el:  #1a1a1a;    /* elevated dark (nested in footer) */
 
-  /* Legacy shorthand vars used throughout the app */
-  --bg:          #F7F9FB;
-  --bg-elevated: #FFFFFF;
-  --white:       #FFFFFF;
-  --border:      #E5EAF0;
+  /* ── Brand ── */
+  --primary:          #1c2f72;    /* brand CTA (replaces cal #111111) */
+  --primary-hover:    #152559;    /* pressed/hover state */
+  --primary-disabled: #e5e7eb;    /* disabled button bg */
+  --primary-tint:     #eef2ff;    /* blue-tinted soft bg */
 
-  --blue:        #4e7fe8;
-  --blue-dark:   #1c2f72;
-  --blue-light:  #eef2ff;
+  /* ── Text ── */
+  --ink:              #111111;    /* headings & primary text */
+  --body:             #374151;    /* default running text */
+  --muted:            #6b7280;    /* secondary / sub-headings */
+  --muted-soft:       #898989;    /* captions / fine print */
+  --on-primary:       #ffffff;    /* text on CTA buttons */
+  --on-dark:          #ffffff;    /* text on dark footer */
+  --on-dark-soft:     #a1a1aa;    /* footer body text */
 
-  --teal:        #35bdd0;
-  --teal-dark:   #0f766e;
-  --teal-light:  #f0fdfa;
+  /* ── Borders ── */
+  --hairline:         #e5e7eb;    /* 1px border on light surfaces */
+  --hairline-soft:    #f3f4f6;    /* barely-visible section divider */
 
-  --text-primary:   #0f172a;
-  --text-secondary: #64748b;
-  --text-muted:     #94a3b8;
+  /* ── Semantic ── */
+  --success:          #10b981;
+  --warning:          #f59e0b;
+  --error:            #ef4444;
 
-  --danger:      #dc2626;
-  --danger-light:#fef2f2;
+  /* ── Badge Accents (used sparingly on tags only) ── */
+  --badge-orange:     #fb923c;
+  --badge-pink:       #ec4899;
+  --badge-violet:     #8b5cf6;
+  --badge-emerald:    #34d399;
+
+  /* ── Legacy aliases (keep backward compat with existing component code) ── */
+  --bg:               var(--canvas);
+  --bg-elevated:      var(--canvas);
+  --white:            #ffffff;
+  --border:           var(--hairline);
+  --blue:             var(--primary);
+  --blue-dark:        #152559;
+  --blue-light:       var(--primary-tint);
+  --teal:             #34d399;
+  --teal-dark:        #0f766e;
+  --teal-light:       #f0fdfa;
+  --text-primary:     var(--ink);
+  --text-secondary:   var(--muted);
+  --text-muted:       var(--muted-soft);
+  --danger:           var(--error);
+  --danger-light:     #fef2f2;
+
+  /* ── Tailwind color tokens ── */
+  --color-bg:           var(--canvas);
+  --color-surface:      var(--canvas);
+  --color-primary:      var(--primary);
+  --color-primary-tint: var(--primary-tint);
+  --color-ink:          var(--ink);
+  --color-muted:        var(--muted);
+  --color-border:       var(--hairline);
+  --color-success:      var(--success);
+  --color-warning:      var(--warning);
+  --color-danger:       var(--error);
+  --color-info:         var(--primary);
+  --color-urgent:       #ef4444;
+
+  /* ── Border Radius Scale (Cal.com) ── */
+  --r-xs:     4px;
+  --r-sm:     6px;
+  --r-md:     8px;   /* buttons & inputs */
+  --r-lg:     12px;  /* content cards */
+  --r-xl:     16px;  /* hero mockup container */
+  --r-pill:   9999px;
+  --r-full:   9999px;
+
+  /* ── Spacing Scale ── */
+  --space-xxs:     4px;
+  --space-xs:      8px;
+  --space-sm:      12px;
+  --space-md:      16px;
+  --space-lg:      24px;
+  --space-xl:      32px;
+  --space-xxl:     48px;
+  --space-section: 96px;
+
+  /* ── Elevation ── */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
 }
 
 @theme inline {
-  --color-bg: var(--color-bg);
-  --color-surface: var(--color-surface);
-  --color-primary: var(--color-primary);
+  --color-bg:           var(--color-bg);
+  --color-surface:      var(--color-surface);
+  --color-primary:      var(--color-primary);
   --color-primary-tint: var(--color-primary-tint);
-  --color-ink: var(--color-ink);
-  --color-muted: var(--color-muted);
-  --color-border: var(--color-border);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-danger: var(--color-danger);
-  --color-info: var(--color-info);
-  --color-urgent: var(--color-urgent);
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-ink:          var(--color-ink);
+  --color-muted:        var(--color-muted);
+  --color-border:       var(--color-border);
+  --color-success:      var(--color-success);
+  --color-warning:      var(--color-warning);
+  --color-danger:       var(--color-danger);
+  --color-info:         var(--color-info);
+  --color-urgent:       var(--color-urgent);
+  --font-sans:          'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* ─── Reset ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  background: var(--canvas);
+}
+
 body {
-  background: var(--bg);
-  color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* ─── Typography helpers ─────────────────────────────────────────────────── */
+/* Cal.com uses Inter 600 with negative letter-spacing as Cal Sans substitute */
+.display-xl { font-size: 64px; font-weight: 600; line-height: 1.05; letter-spacing: -2px; }
+.display-lg { font-size: 48px; font-weight: 600; line-height: 1.1;  letter-spacing: -1.5px; }
+.display-md { font-size: 36px; font-weight: 600; line-height: 1.15; letter-spacing: -1px; }
+.display-sm { font-size: 28px; font-weight: 600; line-height: 1.2;  letter-spacing: -0.5px; }
+
+/* ─── Component primitives ───────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 20px;
+  background: var(--primary); color: var(--on-primary);
+  font-size: 14px; font-weight: 600; line-height: 1;
+  border: none; border-radius: var(--r-md); cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-primary:hover  { background: var(--primary-hover); }
+.btn-primary:active { background: var(--primary-hover); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 20px;
+  background: var(--canvas); color: var(--ink);
+  font-size: 14px; font-weight: 600; line-height: 1;
+  border: 1px solid var(--hairline); border-radius: var(--r-md); cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-secondary:hover { background: var(--surface-soft); }
+
+/* ─── Card primitives ────────────────────────────────────────────────────── */
+.card {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+.card-surface {
+  background: var(--surface-card);
+  border-radius: var(--r-lg);
 }
 
-.shadow-soft {
-  box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+/* ─── Nav-pill-group (signature Cal.com component) ───────────────────────── */
+.pill-group {
+  display: inline-flex;
+  background: var(--surface-soft);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  gap: 2px;
+}
+.pill-group-item {
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  font-size: 14px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all 0.12s; border: none; background: transparent;
+}
+.pill-group-item.active {
+  background: var(--canvas); color: var(--ink);
+  box-shadow: var(--shadow-xs);
 }
 
-.shadow-bento {
-  box-shadow: 
-    0 1px 2px rgba(28, 47, 114, 0.04),
-    0 12px 32px -4px rgba(28, 47, 114, 0.08),
-    0 0 0 1px rgba(28, 47, 114, 0.06);
+/* ─── Badge pill ─────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px;
+  background: var(--surface-card); color: var(--ink);
+  font-size: 13px; font-weight: 500;
+  border-radius: var(--r-pill);
 }
 
-@keyframes border-beam {
-  100% {
-    offset-distance: 100%;
-  }
+/* ─── Input ──────────────────────────────────────────────────────────────── */
+.input {
+  height: 40px; padding: 0 14px;
+  background: var(--canvas); color: var(--ink);
+  font-size: 16px; font-family: inherit;
+  border: 1px solid var(--hairline); border-radius: var(--r-md);
+  outline: none; transition: border-color 0.12s;
 }
+.input:focus { border-color: var(--primary); }
 
-.animate-border-beam {
-  animation: border-beam 12s linear infinite;
+/* ─── Utilities ──────────────────────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.shadow-soft { box-shadow: var(--shadow-sm); }
+.shadow-md   { box-shadow: var(--shadow-md); }
+
+/* ─── Section rhythm ─────────────────────────────────────────────────────── */
+.section { padding-top: var(--space-section); padding-bottom: var(--space-section); }
+
+/* ─── Dark footer surface ────────────────────────────────────────────────── */
+.footer-dark {
+  background: var(--surface-dark);
+  color: var(--on-dark-soft);
 }

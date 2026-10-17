@@ -133,7 +133,7 @@ export default function WorkerDashboardClient({
   });
 
   return (
-    <div className="max-w-[1240px] mx-auto select-none font-sans pb-12">
+    <div className="max-w-[1200px] mx-auto select-none font-sans pb-12">
       {/* ── Top Bar: Subdued Network Status & Verification ── */}
       <div className="flex items-center justify-between pb-3 md:pb-4 mb-3 border-b border-slate-200/60">
         <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
@@ -161,10 +161,10 @@ export default function WorkerDashboardClient({
       {/* ── Practitioner Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-semibold text-[#111111] tracking-tight" style={{ letterSpacing: '-0.5px' }}>
             Hello, {workerName}
           </h1>
-          <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">
+          <p className="text-sm text-[#6b7280] font-normal mt-1">
             {workerCadre} · Active Roster
           </p>
         </div>
@@ -172,26 +172,28 @@ export default function WorkerDashboardClient({
         {/* Desktop Search */}
         <div className="hidden md:flex items-center gap-3">
           <div className="relative">
-            <Search size={15} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+            <Search size={15} className="absolute left-3 top-3 text-[#6b7280] pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search shifts, hospitals, departments..."
-              className="w-72 pl-9 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#1c2f72] focus:ring-1 focus:ring-[#1c2f72] transition-all shadow-xs"
+              className="w-72 pl-9 pr-4 py-2 bg-white border border-[#e5e7eb] text-sm text-[#111111] placeholder:text-[#898989] focus:outline-none focus:border-[#1c2f72] transition-all"
+              style={{ borderRadius: 8, height: 40 }}
             />
           </div>
         </div>
 
         {/* Mobile Full-Width Search */}
         <div className="relative md:hidden">
-          <Search size={15} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+          <Search size={15} className="absolute left-3 top-3 text-[#6b7280] pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search shifts, hospitals, wards..."
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-100 focus:bg-white border border-transparent focus:border-[#1c2f72] text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none transition-all"
+            className="w-full pl-9 pr-4 py-2.5 border border-[#e5e7eb] bg-[#f5f5f5] focus:bg-white text-sm text-[#111111] placeholder:text-[#898989] focus:outline-none focus:border-[#1c2f72] transition-all"
+            style={{ borderRadius: 8 }}
           />
         </div>
       </div>
@@ -206,7 +208,8 @@ export default function WorkerDashboardClient({
         <div className="relative">
           <button
             onClick={() => setTimeDropdown(!timeDropdown)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 border text-xs font-medium text-[#374151] hover:bg-[#f5f5f5] transition-all cursor-pointer"
+            style={{ borderColor: '#e5e7eb', borderRadius: 8, background: '#ffffff' }}
           >
             <span>{timeframe}</span>
             <ChevronDown size={13} className="text-slate-400" />
@@ -218,16 +221,13 @@ export default function WorkerDashboardClient({
                 className="fixed inset-0 z-30"
                 onClick={() => setTimeDropdown(false)}
               />
-              <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-40 animate-in fade-in duration-100">
+              <div className="absolute right-0 mt-1 w-36 bg-white border border-[#e5e7eb] rounded-lg shadow-md py-1 z-40">
                 {['This Week', 'This Month', 'All Time'].map(t => (
                   <button
                     key={t}
-                    onClick={() => {
-                      setTimeframe(t);
-                      setTimeDropdown(false);
-                    }}
-                    className={`w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-slate-50 transition-colors ${
-                      timeframe === t ? 'text-[#1c2f72] bg-slate-50 font-bold' : 'text-slate-700'
+                    onClick={() => { setTimeframe(t); setTimeDropdown(false); }}
+                    className={`w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-[#f5f5f5] transition-colors ${
+                      timeframe === t ? 'text-[#1c2f72] bg-[#f5f5f5] font-semibold' : 'text-[#374151]'
                     }`}
                   >
                     {t}
@@ -242,47 +242,39 @@ export default function WorkerDashboardClient({
       {/* ── Professional Metric Cards (Disciplined Colors & Clean Spacing) ── */}
       <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x no-scrollbar mb-6">
         {/* Card 1: Shift Earnings */}
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
+        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start rounded-xl border border-[#e5e7eb] p-5 flex flex-col justify-between" style={{ background: '#f5f5f5' }}>
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500">
-                Shift Earnings
-              </span>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/60">
-                +12% vs last week
-              </span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-[#6b7280]">Shift Earnings</span>
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-white text-[#374151] border border-[#e5e7eb]">+12% vs last week</span>
             </div>
-            <div className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+            <div className="text-2xl md:text-3xl font-semibold text-[#111111] mb-1" style={{ letterSpacing: '-0.5px' }}>
               ETB {earnings ? earnings.toLocaleString() : '14,850'}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100">
-            <span className="text-slate-400 font-medium">Disbursed</span>
-            <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+          <div className="flex items-center justify-between text-xs pt-3 border-t border-[#e5e7eb]">
+            <span className="text-[#898989]">Disbursed</span>
+            <span className="font-medium text-[#374151] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
               Completed
             </span>
           </div>
         </div>
 
         {/* Card 2: Open Shifts */}
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
+        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start rounded-xl border border-[#e5e7eb] p-5 flex flex-col justify-between" style={{ background: '#f5f5f5' }}>
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500">
-                Open Shifts Available
-              </span>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/60">
-                +8 New
-              </span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-[#6b7280]">Open Shifts Available</span>
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-white text-[#374151] border border-[#e5e7eb]">+8 New</span>
             </div>
-            <div className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+            <div className="text-2xl md:text-3xl font-semibold text-[#111111] mb-1" style={{ letterSpacing: '-0.5px' }}>
               {shifts.length > 0 ? shifts.length * 16 + 28 : '124'}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100">
-            <span className="text-slate-400 font-medium">Addis Ababa Hospitals</span>
-            <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+          <div className="flex items-center justify-between text-xs pt-3 border-t border-[#e5e7eb]">
+            <span className="text-[#898989]">Addis Ababa Hospitals</span>
+            <span className="font-medium text-[#374151] flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#1c2f72]"></span>
               Active Roster
             </span>
@@ -290,24 +282,22 @@ export default function WorkerDashboardClient({
         </div>
 
         {/* Card 3: Quality Score */}
-        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start bg-white rounded-2xl border border-slate-200/70 p-5 shadow-xs flex flex-col justify-between">
+        <div className="min-w-[240px] md:min-w-0 flex-1 snap-start rounded-xl border border-[#e5e7eb] p-5 flex flex-col justify-between" style={{ background: '#f5f5f5' }}>
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500">
-                Hospital Peer Rating
-              </span>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/60 flex items-center gap-1">
-                <Star size={11} className="fill-amber-500 text-amber-500" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-[#6b7280]">Hospital Peer Rating</span>
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-white text-[#374151] border border-[#e5e7eb] flex items-center gap-1">
+                <Star size={11} className="fill-[#fb923c] text-[#fb923c]" />
                 4.9 / 5.0
               </span>
             </div>
-            <div className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+            <div className="text-2xl md:text-3xl font-semibold text-[#111111] mb-1" style={{ letterSpacing: '-0.5px' }}>
               98.4%
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100">
-            <span className="text-slate-400 font-medium">Shift Fulfillment</span>
-            <span className="font-semibold text-slate-700">Top 5% Practitioner</span>
+          <div className="flex items-center justify-between text-xs pt-3 border-t border-[#e5e7eb]">
+            <span className="text-[#898989]">Shift Fulfillment</span>
+            <span className="font-medium text-[#374151]">Top 5% Practitioner</span>
           </div>
         </div>
       </div>
@@ -474,23 +464,18 @@ export default function WorkerDashboardClient({
       )}
 
       {/* ── Available Shifts Feed & Role Filter ── */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-5 md:p-6 shadow-xs mb-6 md:mb-8">
+      <div className="rounded-xl border border-[#e5e7eb] p-5 md:p-6 mb-6 md:mb-8" style={{ background: '#ffffff' }}>
         <div className="flex items-center justify-between gap-3 mb-4">
           <div>
-            <h3 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">
+            <h3 className="text-base md:text-lg font-semibold text-[#111111]" style={{ letterSpacing: '-0.2px' }}>
               Available Shifts in Addis Ababa
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[#6b7280] mt-0.5">
               Verified clinical assignments with direct hospital coordination
             </p>
           </div>
-
-          <Link
-            href="/worker/shifts"
-            className="text-xs font-semibold text-[#1c2f72] hover:underline flex items-center gap-0.5 shrink-0"
-          >
-            All Shifts
-            <ArrowRight size={13} />
+          <Link href="/worker/shifts" className="text-xs font-medium text-[#1c2f72] flex items-center gap-0.5 shrink-0">
+            All Shifts <ArrowRight size={13} />
           </Link>
         </div>
 
@@ -500,11 +485,16 @@ export default function WorkerDashboardClient({
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1 text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                 selectedRole === role
-                  ? 'bg-[#1c2f72] text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
+                  ? 'bg-[#1c2f72] text-white'
+                  : 'text-[#374151] hover:bg-[#f5f5f5]'
               }`}
+              style={{
+                borderRadius: 6,
+                border: selectedRole === role ? 'none' : '1px solid #e5e7eb',
+                background: selectedRole === role ? '#1c2f72' : '#ffffff',
+              }}
             >
               {role}
             </button>
@@ -517,88 +507,67 @@ export default function WorkerDashboardClient({
             No open shifts match your search filter.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-3.5">
             {filteredShifts.slice(0, 6).map(shift => {
               const isApplied = !!shift.my_application;
               const dateStr = new Date(shift.shift_date).toLocaleDateString('en-GB', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
+                weekday: 'short', day: 'numeric', month: 'short',
               });
 
               return (
                 <div
                   key={shift.id}
-                  className="p-4 rounded-xl border border-slate-200/60 bg-[#fbfcfd] hover:bg-white hover:border-slate-300 transition-all flex flex-col justify-between"
+                  className="p-4 flex flex-col justify-between border border-[#e5e7eb] transition-all"
+                  style={{ borderRadius: 12, background: '#f5f5f5' }}
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/60">
-                          {shift.role_needed}
-                        </span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-white text-[#374151] border border-[#e5e7eb]">{shift.role_needed}</span>
                         <Link
                           href={`/worker/shifts/${shift.id}`}
-                          className="block text-sm font-bold text-slate-900 hover:text-[#1c2f72] transition-colors mt-1"
+                          className="block text-sm font-semibold text-[#111111] hover:text-[#1c2f72] transition-colors mt-1.5"
                         >
                           {shift.description}
                         </Link>
                       </div>
-
                       <div className="text-right shrink-0">
-                        <div className="text-base font-extrabold text-[#1c2f72]">
-                          ETB {shift.pay_etb.toLocaleString()}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-medium">per shift</div>
+                        <div className="text-base font-semibold text-[#1c2f72]" style={{ letterSpacing: '-0.2px' }}>ETB {shift.pay_etb.toLocaleString()}</div>
+                        <div className="text-[10px] text-[#898989] font-normal">per shift</div>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3">
-                      <span className="flex items-center gap-1 font-medium text-slate-700">
-                        <Building2 size={12} className="text-[#1c2f72]" />
-                        {shift.facility_name}
-                      </span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <MapPin size={12} className="text-slate-400" />
-                        {shift.location.split(',')[0]}
-                      </span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} className="text-slate-400" />
-                        {shift.start_time}–{shift.end_time}
-                      </span>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#6b7280] mb-3">
+                      <span className="flex items-center gap-1 font-medium text-[#374151]"><Building2 size={12} className="text-[#1c2f72]" />{shift.facility_name}</span>
+                      <span className="text-[#e5e7eb]">·</span>
+                      <span className="flex items-center gap-1"><MapPin size={12} />{shift.location.split(',')[0]}</span>
+                      <span className="text-[#e5e7eb]">·</span>
+                      <span className="flex items-center gap-1"><Clock size={12} />{shift.start_time}–{shift.end_time}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
-                    <span className="flex items-center gap-1 font-medium text-slate-600">
-                      <CalendarIcon size={12} className="text-slate-400" />
-                      {dateStr}
-                    </span>
-
+                  <div className="flex items-center justify-between pt-2.5 border-t border-[#e5e7eb] text-xs">
+                    <span className="flex items-center gap-1 font-medium text-[#6b7280]"><CalendarIcon size={12} />{dateStr}</span>
                     <div className="flex items-center gap-2">
                       <a
-                        href={`https://wa.me/?text=${encodeURIComponent(
-                          `Open ${shift.role_needed} Shift in Addis Ababa:\nFacility: ${shift.facility_name}\nLocation: ${shift.location}\nDate: ${dateStr} (${shift.start_time} - ${shift.end_time})\nRate: ETB ${shift.pay_etb.toLocaleString()}\nApply on Tiruf: http://localhost:3000/worker/shifts/${shift.id}`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Share shift link"
-                        className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        href={`https://wa.me/?text=${encodeURIComponent(`Open ${shift.role_needed} Shift:\n${shift.facility_name}, ${shift.location}\n${dateStr} ${shift.start_time}-${shift.end_time}\nETB ${shift.pay_etb.toLocaleString()}`)}`}
+                        target="_blank" rel="noopener noreferrer" title="Share"
+                        className="p-1.5 text-[#6b7280] hover:bg-white rounded transition-colors" style={{ borderRadius: 6 }}
                       >
                         <Share2 size={13} />
                       </a>
-
                       {isApplied ? (
-                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="text-[11px] font-medium px-2.5 py-1 border border-[#e5e7eb] text-[#374151]" style={{ borderRadius: 6, background: '#ffffff' }}>
                           {shift.my_application === 'confirmed' ? 'Confirmed' : 'Pending'}
                         </span>
                       ) : (
                         <button
                           onClick={() => handleApply(shift.id)}
                           disabled={applying === shift.id}
-                          className="px-3.5 py-1.5 rounded-lg bg-[#1c2f72] hover:bg-[#152355] text-white text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                          className="text-white text-xs font-medium transition-all disabled:opacity-50 cursor-pointer"
+                          style={{ padding: '5px 14px', borderRadius: 8, background: '#1c2f72' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = '#152559')}
+                          onMouseLeave={e => (e.currentTarget.style.background = '#1c2f72')}
                         >
                           {applying === shift.id ? 'Applying...' : 'Apply'}
                         </button>

@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
-  LayoutGrid, BarChart3, Mail, Calendar, FileText,
-  LogOut, PlusCircle, Building2, User, Briefcase, ClipboardList
+  LayoutGrid, Mail, Calendar, FileText,
+  LogOut, PlusCircle, Building2, User, Briefcase, ClipboardList,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -14,40 +14,40 @@ interface NavbarProps {
 }
 
 const DESKTOP_WORKER_TABS = [
-  { href: '/worker/dashboard', icon: LayoutGrid, label: 'Overview' },
-  { href: '/worker/shifts',    icon: Briefcase,  label: 'Browse Shifts' },
-  { href: '/worker/help',      icon: Mail,       label: 'Support & Help' },
-  { href: '/worker/calendar',  icon: Calendar,   label: 'Calendar & Roster' },
-  { href: '/worker/my-shifts', icon: ClipboardList, label: 'My Applications' },
+  { href: '/worker/dashboard', icon: LayoutGrid,    label: 'Overview'          },
+  { href: '/worker/shifts',    icon: Briefcase,      label: 'Browse Shifts'     },
+  { href: '/worker/calendar',  icon: Calendar,       label: 'Calendar'          },
+  { href: '/worker/my-shifts', icon: ClipboardList,  label: 'My Applications'   },
+  { href: '/worker/help',      icon: Mail,           label: 'Support'           },
 ];
 
 const MOBILE_WORKER_TABS = [
-  { href: '/worker/dashboard', icon: LayoutGrid, label: 'Overview' },
-  { href: '/worker/shifts',    icon: Briefcase,  label: 'Shifts' },
-  { href: '/worker/calendar',  icon: Calendar,   label: 'Calendar' },
-  { href: '/worker/my-shifts', icon: ClipboardList, label: 'My Shifts' },
-  { href: '/worker/profile',   icon: User,       label: 'Profile' },
+  { href: '/worker/dashboard', icon: LayoutGrid,    label: 'Overview'   },
+  { href: '/worker/shifts',    icon: Briefcase,      label: 'Shifts'     },
+  { href: '/worker/calendar',  icon: Calendar,       label: 'Calendar'   },
+  { href: '/worker/my-shifts', icon: ClipboardList,  label: 'Applied'    },
+  { href: '/worker/profile',   icon: User,           label: 'Profile'    },
 ];
 
 const DESKTOP_FACILITY_TABS = [
-  { href: '/facility/dashboard',  icon: LayoutGrid, label: 'Dashboard' },
-  { href: '/facility/shifts',     icon: FileText,   label: 'My Shifts' },
-  { href: '/facility/shifts/new', icon: PlusCircle, label: 'Post a Shift' },
+  { href: '/facility/dashboard',  icon: LayoutGrid, label: 'Dashboard'       },
+  { href: '/facility/shifts',     icon: FileText,   label: 'My Shifts'       },
+  { href: '/facility/shifts/new', icon: PlusCircle, label: 'Post a Shift'    },
   { href: '/facility/profile',    icon: Building2,  label: 'Facility Profile' },
 ];
 
 const MOBILE_FACILITY_TABS = [
   { href: '/facility/dashboard',  icon: LayoutGrid, label: 'Dashboard' },
-  { href: '/facility/shifts',     icon: FileText,   label: 'Shifts' },
-  { href: '/facility/shifts/new', icon: PlusCircle, label: 'Post' },
-  { href: '/facility/profile',    icon: Building2,  label: 'Profile' },
+  { href: '/facility/shifts',     icon: FileText,   label: 'Shifts'    },
+  { href: '/facility/shifts/new', icon: PlusCircle, label: 'Post'      },
+  { href: '/facility/profile',    icon: Building2,  label: 'Profile'   },
 ];
 
 export default function Navbar({ userType, userName }: NavbarProps) {
-  const pathname = usePathname();
-  const router   = useRouter();
-  const desktopTabs = userType === 'worker' ? DESKTOP_WORKER_TABS : DESKTOP_FACILITY_TABS;
-  const mobileTabs  = userType === 'worker' ? MOBILE_WORKER_TABS  : MOBILE_FACILITY_TABS;
+  const pathname     = usePathname();
+  const router       = useRouter();
+  const desktopTabs  = userType === 'worker' ? DESKTOP_WORKER_TABS : DESKTOP_FACILITY_TABS;
+  const mobileTabs   = userType === 'worker' ? MOBILE_WORKER_TABS  : MOBILE_FACILITY_TABS;
   const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleLogout() {
@@ -61,79 +61,93 @@ export default function Navbar({ userType, userName }: NavbarProps) {
     .filter(Boolean)
     .slice(0, 2)
     .map(w => w[0]?.toUpperCase() ?? '')
-    .join('') || userName[0]?.toUpperCase() || 'ST';
+    .join('') || userName[0]?.toUpperCase() || 'U';
+
+  function isActive(href: string) {
+    if (href === '/worker/dashboard' || href === '/facility/dashboard') {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  }
 
   return (
     <>
-      {/* ── Desktop Icon Rail (Matches mockup) ── */}
+      {/* ────────────────────────────────────────────────────────────────────
+          Desktop Icon Rail  —  Cal.com style: white, 76px wide, hairline right border
+      ──────────────────────────────────────────────────────────────────── */}
       <aside
-        className="hidden md:flex shrink-0 w-[76px] h-screen sticky top-0 flex-col justify-between items-center py-6 border-r border-[#eef2f6] bg-white z-40 select-none"
+        className="hidden md:flex shrink-0 w-[72px] h-screen sticky top-0 flex-col justify-between items-center py-5 z-40 select-none"
+        style={{ background: '#ffffff', borderRight: '1px solid #e5e7eb' }}
       >
-        {/* Top Logo */}
-        <div className="flex flex-col items-center">
+        {/* Wordmark / Logo */}
+        <div className="flex flex-col items-center gap-6 w-full">
           <Link
             href="/"
             title="Tiruf Home"
-            className="w-11 h-11 flex items-center justify-center text-[26px] font-black text-[#2563eb] hover:opacity-80 transition-opacity"
-            style={{ letterSpacing: '-0.5px' }}
+            className="w-10 h-10 flex items-center justify-center rounded-lg text-white text-xl font-bold tracking-tight"
+            style={{ background: '#1c2f72', letterSpacing: '-0.5px' }}
           >
             T
           </Link>
+
+          {/* Nav Icons */}
+          <nav className="flex flex-col items-center gap-1 w-full px-2">
+            {desktopTabs.map(({ href, icon: Icon, label }) => {
+              const active = isActive(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  title={label}
+                  className="relative group flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-100"
+                  style={{
+                    background:  active ? '#eef2ff' : 'transparent',
+                    color:       active ? '#1c2f72' : '#6b7280',
+                  }}
+                >
+                  <Icon size={18} strokeWidth={active ? 2.2 : 1.8} />
+
+                  {/* Active indicator dot */}
+                  {active && (
+                    <span
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r"
+                      style={{ background: '#1c2f72' }}
+                    />
+                  )}
+
+                  {/* Tooltip */}
+                  <span className="absolute left-[58px] bg-[#111111] text-white text-[11px] font-medium px-2.5 py-1 rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-sm">
+                    {label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Middle Navigation Icons */}
-        <nav className="flex flex-col items-center gap-3 w-full px-3">
-          {desktopTabs.map(({ href, icon: Icon, label }) => {
-            const active =
-              pathname === href ||
-              (href !== '/worker/dashboard' &&
-                href !== '/facility/dashboard' &&
-                pathname.startsWith(href));
-
-            return (
-              <Link
-                key={href}
-                href={href}
-                title={label}
-                className={`relative group flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-150 ${
-                  active
-                    ? 'bg-[#2563eb] text-white shadow-sm shadow-blue-500/25 scale-[1.02]'
-                    : 'text-[#94a3b8] hover:text-[#334155] hover:bg-[#f8fafc]'
-                }`}
-              >
-                <Icon size={20} strokeWidth={active ? 2.4 : 1.9} />
-
-                {/* Tooltip on hover */}
-                <span className="absolute left-[62px] bg-[#12234e] text-white text-[11px] font-semibold px-2.5 py-1 rounded-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-md">
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Bottom Avatar & Logout Menu */}
+        {/* Avatar + Logout Menu */}
         <div className="relative flex flex-col items-center">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             title={userName}
-            className="w-10 h-10 rounded-full bg-[#12234e] text-white text-xs font-bold flex items-center justify-center hover:ring-2 hover:ring-blue-400 transition-all cursor-pointer shadow-sm"
+            className="w-9 h-9 rounded-full text-white text-xs font-bold flex items-center justify-center transition-all cursor-pointer"
+            style={{ background: '#1c2f72' }}
           >
             {initials}
           </button>
 
           {menuOpen && (
             <>
+              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
               <div
-                className="fixed inset-0 z-40"
-                onClick={() => setMenuOpen(false)}
-              />
-              <div className="absolute left-[58px] bottom-0 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-2 py-1.5 border-b border-slate-100 mb-1">
-                  <div className="text-xs font-bold text-slate-900 truncate">
+                className="absolute left-[52px] bottom-0 w-52 rounded-xl shadow-lg border py-2 z-50"
+                style={{ background: '#ffffff', borderColor: '#e5e7eb' }}
+              >
+                <div className="px-3 py-2 border-b mb-1" style={{ borderColor: '#f3f4f6' }}>
+                  <div className="text-xs font-semibold truncate" style={{ color: '#111111' }}>
                     {userName}
                   </div>
-                  <div className="text-[11px] text-slate-500 font-medium">
+                  <div className="text-[11px] mt-0.5" style={{ color: '#6b7280' }}>
                     {userType === 'facility' ? 'Facility Manager' : 'Healthcare Worker'}
                   </div>
                 </div>
@@ -141,17 +155,23 @@ export default function Navbar({ userType, userName }: NavbarProps) {
                 <Link
                   href={userType === 'facility' ? '/facility/profile' : '/worker/profile'}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors"
+                  style={{ color: '#374151' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <User size={14} className="text-slate-400" />
+                  <User size={13} />
                   View Profile
                 </Link>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-2 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left cursor-pointer transition-colors"
+                  style={{ color: '#ef4444' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <LogOut size={14} className="text-rose-500" />
+                  <LogOut size={13} />
                   Sign Out
                 </button>
               </div>
@@ -160,42 +180,33 @@ export default function Navbar({ userType, userName }: NavbarProps) {
         </div>
       </aside>
 
-      {/* ── Apple iOS HIG Mobile Bottom Tab Bar ── */}
+      {/* ────────────────────────────────────────────────────────────────────
+          Mobile Bottom Tab Bar  —  white, 1px top hairline, safe-area padding
+      ──────────────────────────────────────────────────────────────────── */}
       <nav
         aria-label="Mobile Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/90 border-t border-slate-200/70 shadow-[0_-1px_10px_rgba(0,0,0,0.03)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50"
         style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom), 10px)',
+          background: '#ffffff',
+          borderTop: '1px solid #e5e7eb',
+          paddingBottom: 'max(env(safe-area-inset-bottom), 8px)',
           paddingTop: '6px',
         }}
       >
-        <div className="flex items-center justify-around max-w-md mx-auto px-2">
+        <div className="flex items-center justify-around max-w-md mx-auto px-1">
           {mobileTabs.map(({ href, icon: Icon, label }) => {
-            const active =
-              pathname === href ||
-              (href !== '/worker/dashboard' &&
-                href !== '/facility/dashboard' &&
-                pathname.startsWith(href));
-
+            const active = isActive(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex-1 flex flex-col items-center justify-center py-1 transition-all active:scale-95 ${
-                  active ? 'text-[#2563eb]' : 'text-[#8E8E93] hover:text-slate-600'
-                }`}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-all active:scale-95"
+                style={{ color: active ? '#1c2f72' : '#6b7280' }}
               >
-                <div
-                  className={`p-1 rounded-xl transition-all ${
-                    active ? 'text-[#2563eb]' : ''
-                  }`}
-                >
-                  <Icon size={21} strokeWidth={active ? 2.4 : 1.7} />
-                </div>
+                <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
                 <span
-                  className={`text-[10px] tracking-tight transition-all ${
-                    active ? 'font-bold text-[#2563eb]' : 'font-medium text-[#8E8E93]'
-                  }`}
+                  className="text-[10px] font-medium"
+                  style={{ fontWeight: active ? 600 : 500 }}
                 >
                   {label}
                 </span>
